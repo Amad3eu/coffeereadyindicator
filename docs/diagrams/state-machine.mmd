@@ -1,0 +1,30 @@
+%% Coffee detection state machine (src/core/CoffeeDetector.cpp).
+stateDiagram-v2
+    direction TB
+    [*] --> IDLE
+
+    IDLE --> DETECTING: light on
+    IDLE --> NOTIFIED: light already on at boot<br/>(alertIfLightOnAtBoot = false)
+
+    DETECTING --> IDLE: light off
+    DETECTING --> READY: light on for readyConfirmationMs<br/>⇒ CoffeeReady
+
+    READY --> NOTIFIED: alert delivered<br/>(markNotified)
+
+    NOTIFIED --> REARMING: light off
+
+    REARMING --> NOTIFIED: light on again
+    REARMING --> IDLE: light off for rearmConfirmationMs<br/>⇒ CoffeeReset
+
+    note right of READY
+        Buzzer pattern plays (non-blocking),
+        then the notifier is called once.
+    end note
+
+    note left of IDLE
+        "light on/off" comes from the hysteresis:
+        on at ≥ lightOnThreshold,
+        off at ≤ lightOffThreshold.
+        Invalid readings freeze the machine
+        and raise SensorFailure once.
+    end note

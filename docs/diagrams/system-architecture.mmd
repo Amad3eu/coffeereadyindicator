@@ -1,0 +1,33 @@
+%% System architecture: from the coffee machine LED to Alexa.
+%% Rendered by scripts/build_docs.py into docs/images/diagrams/system-architecture.svg
+flowchart TB
+    subgraph machine["Coffee machine (never opened, never wired)"]
+        LED["Green READY LED"]
+    end
+
+    LED -. "light only" .-> PT["Phototransistor TEPT4400<br/>+ 10 kΩ load"]
+
+    subgraph device["Coffee Sentinel · ESP32 DevKit V1"]
+        direction TB
+        PT --> SENSOR["Esp32AnalogLightSensor<br/><i>infrastructure</i>"]
+        SENSOR --> DETECTOR["CoffeeDetector<br/>hysteresis · confirmation · state machine<br/><i>core</i>"]
+        DETECTOR -- "EventType" --> APP["CoffeeSentinelApp<br/><i>application</i>"]
+        APP --> BUZZER["Buzzer<br/>PatternPlayer"]
+        APP --> SLED["Status LED<br/>PatternPlayer"]
+        APP --> NOTIFIER["Notifier"]
+        NOTIFIER --> SERIAL["SerialNotifier"]
+        NOTIFIER --> WEBHOOK["WebhookNotifier"]
+        WEBHOOK --> WIFI["Esp32WiFiLink"]
+    end
+
+    WIFI -- "HTTP POST (JSON)" --> HA["Home Assistant<br/>or your own service"]
+    HA --> ALEXA["Alexa<br/>“The coffee is ready.”"]
+
+    classDef core fill:#e8f4ea,stroke:#2e7d32,color:#1b1b1b;
+    classDef app fill:#e9eef8,stroke:#3b5bdb,color:#1b1b1b;
+    classDef infra fill:#fdf1e3,stroke:#d9822b,color:#1b1b1b;
+    classDef ext fill:#f3f3f3,stroke:#8d8d8d,color:#1b1b1b;
+    class DETECTOR core;
+    class APP,BUZZER,SLED,NOTIFIER app;
+    class SENSOR,SERIAL,WEBHOOK,WIFI infra;
+    class LED,PT,HA,ALEXA ext;

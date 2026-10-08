@@ -1,0 +1,27 @@
+%% Dependency direction between the source layers. Arrows mean "depends on".
+flowchart LR
+    MAIN["src/main.cpp<br/>composition root"]
+    INFRA["src/infrastructure/esp32<br/>Arduino adapters"]
+    APP["src/application<br/>coordination · calibration"]
+    HW["src/hardware<br/>ports · PatternPlayer · Logger"]
+    CORE["src/core<br/>detector · hysteresis · events · config"]
+    TESTS["test/ (native, Unity)<br/>mocks of every port"]
+
+    MAIN --> INFRA
+    MAIN --> APP
+    INFRA --> HW
+    APP --> HW
+    APP --> CORE
+    HW --> CORE
+    TESTS --> APP
+    TESTS --> HW
+    TESTS --> CORE
+
+    classDef core fill:#e8f4ea,stroke:#2e7d32,color:#1b1b1b;
+    classDef app fill:#e9eef8,stroke:#3b5bdb,color:#1b1b1b;
+    classDef infra fill:#fdf1e3,stroke:#d9822b,color:#1b1b1b;
+    classDef test fill:#f3f3f3,stroke:#8d8d8d,color:#1b1b1b;
+    class CORE,HW core;
+    class APP app;
+    class INFRA,MAIN infra;
+    class TESTS test;

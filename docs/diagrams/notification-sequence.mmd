@@ -1,0 +1,29 @@
+%% What happens on one coffee, from sampling to the webhook.
+sequenceDiagram
+    autonumber
+    participant S as LightSensor
+    participant D as CoffeeDetector
+    participant A as CoffeeSentinelApp
+    participant B as Buzzer (PatternPlayer)
+    participant N as Notifier
+
+    loop every sampleIntervalMs (50 ms)
+        A->>S: read()
+        S-->>A: LightReading
+        A->>D: update(reading, nowMs)
+        D-->>A: EventType::None
+    end
+
+    Note over D: light on for readyConfirmationMs<br/>DETECTING → READY
+    A->>D: update(reading, nowMs)
+    D-->>A: EventType::CoffeeReady
+    A->>B: play(kCoffeeReady, nowMs)
+
+    loop until the pattern ends (~420 ms)
+        A->>B: update(nowMs)
+    end
+
+    A->>N: notify(CoffeeReady)
+    N-->>A: true / false (logged as WARN)
+    A->>D: markNotified(nowMs)
+    Note over D: READY → NOTIFIED
