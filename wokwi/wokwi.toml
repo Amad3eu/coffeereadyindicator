@@ -1,0 +1,10 @@
+# Wokwi simulator configuration (https://docs.wokwi.com/vscode/project-config)
+#
+#   pio run -e esp32dev          # build the firmware first
+#   wokwi-cli wokwi              # CLI, or open this file with the VS Code extension
+#
+# Paths are relative to this file.
+[wokwi]
+version = 1
+firmware = "../.pio/build/esp32dev/firmware.bin"
+elf = "../.pio/build/esp32dev/firmware.elf"

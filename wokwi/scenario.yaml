@@ -1,0 +1,36 @@
+# Automated Wokwi scenario (https://docs.wokwi.com/wokwi-ci/scenarios).
+#
+#   pio run -e esp32dev
+#   wokwi-cli wokwi --scenario scenario.yaml --timeout 60000
+#
+# Drives the potentiometer that stands in for the coffee machine LED and
+# checks the serial log for the expected state transitions.
+name: "Coffee ready detection"
+version: 1
+author: "Coffee Sentinel"
+
+steps:
+  - wait-serial: "State: IDLE"
+
+  # Light turns on: the potentiometer at 90 % gives ~3700 on the 12-bit ADC.
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.9
+  - wait-serial: "[STATE] IDLE -> DETECTING"
+  - wait-serial: "[STATE] DETECTING -> READY"
+  - wait-serial: "[EVENT] CoffeeReady"
+  - wait-serial: "[NOTIFY] Coffee is ready"
+  - wait-serial: "[STATE] READY -> NOTIFIED"
+
+  # Light stays on: no second alert expected (the next line must be the re-arm).
+  - delay: 5000ms
+
+  # Light turns off: the machine was switched off or the carafe removed.
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.02
+  - wait-serial: "[STATE] NOTIFIED -> REARMING"
+  - wait-serial: "[STATE] REARMING -> IDLE"
+  - wait-serial: "[EVENT] CoffeeReset"

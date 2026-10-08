@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "author": "Coffee Sentinel",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-esp32-devkit-v1",
+      "id": "esp",
+      "top": 0,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-potentiometer",
+      "id": "pot1",
+      "top": 40,
+      "left": -160,
+      "attrs": { "value": "0" }
+    },
+    {
+      "type": "wokwi-buzzer",
+      "id": "bz1",
+      "top": 40,
+      "left": 230,
+      "attrs": { "volume": "0.1" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led1",
+      "top": 160,
+      "left": 240,
+      "attrs": { "color": "green" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": 200,
+      "left": 160,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "txt1",
+      "top": -60,
+      "left": -160,
+      "attrs": { "text": "Turn the potentiometer to simulate the coffee machine LED seen by the phototransistor" }
+    }
+  ],
+  "connections": [
+    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX0", "$serialMonitor:TX", "", [] ],
+
+    [ "pot1:VCC", "esp:3V3", "red", [ "v0" ] ],
+    [ "pot1:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "pot1:SIG", "esp:D34", "orange", [ "v0" ] ],
+
+    [ "bz1:2", "esp:D25", "purple", [ "v0" ] ],
+    [ "bz1:1", "esp:GND.2", "black", [ "v0" ] ],
+
+    [ "esp:D2", "r1:1", "green", [ "v0" ] ],
+    [ "r1:2", "led1:A", "green", [ "v0" ] ],
+    [ "led1:C", "esp:GND.2", "black", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}
