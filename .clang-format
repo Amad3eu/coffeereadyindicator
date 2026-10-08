@@ -1,0 +1,42 @@
+# Coffee Sentinel code style: Google base, 4-space indent, 110 columns.
+# Run `make format` (or scripts/check-format.sh) before opening a PR.
+---
+Language: Cpp
+BasedOnStyle: Google
+Standard: c++17
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 110
+AccessModifierOffset: -1
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+AlignTrailingComments: true
+BinPackArguments: true
+BinPackParameters: true
+BreakBeforeBraces: Attach
+DerivePointerAlignment: false
+PointerAlignment: Left
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^<unity\.h>'
+    Priority: 1
+  - Regex: '^<(Arduino|WiFi|HTTPClient|Preferences|WiFiClient|WiFiClientSecure)\.h>'
+    Priority: 2
+  - Regex: '^<.*>'
+    Priority: 3
+  - Regex: '^"(core|hardware|application|infrastructure)/'
+    Priority: 4
+  - Regex: '^"(mocks|support)/'
+    Priority: 5
+  - Regex: '.*'
+    Priority: 6
+SortIncludes: CaseSensitive
+SpacesBeforeTrailingComments: 2
+NamespaceIndentation: None
+FixNamespaceComments: true
+...

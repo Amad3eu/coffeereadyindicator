@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "platformio.platformio-ide",
+    "wokwi.wokwi-vscode",
+    "xaver.clang-format",
+    "bierner.markdown-mermaid",
+    "editorconfig.editorconfig"
+  ]
+}

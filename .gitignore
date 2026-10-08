@@ -1,0 +1,35 @@
+# PlatformIO
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# Secrets (copy include/secrets.example.h to include/secrets.h)
+include/secrets.h
+
+# Generated documentation (run `make docs`) and GIF frames (make gif --frames)
+docs/images/frames/
+docs/generated/*
+!docs/generated/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node (mermaid-cli via npx)
+node_modules/
+
+# Editors / IDEs (keep .vscode/extensions.json)
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+.DS_Store
+
+# Build artifacts
+*.o
+*.elf
+*.bin
+*.map
+compile_commands.json
