@@ -11,11 +11,14 @@ Frames
 5. Buzzer beeps
 6. Webhook -> Alexa: "Coffee is ready!"
 
-Only Pillow is required:
+Only Pillow (>= 9.0) is required:
 
     python3 -m pip install pillow
     python3 scripts/generate_demo_gif.py            # writes docs/images/coffee-flow.gif
     python3 scripts/generate_demo_gif.py --frames   # also writes the individual PNG frames
+
+The output is byte-for-byte reproducible for a given Pillow version; different
+Pillow releases encode the same frames slightly differently.
 """
 
 from __future__ import annotations
@@ -28,6 +31,10 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parent.parent
 OUTPUT = ROOT / "docs" / "images" / "coffee-flow.gif"
 FRAMES_DIR = ROOT / "docs" / "images" / "frames"
+
+# Pillow >= 9.1 exposes these as enums; older releases use module-level constants.
+QUANTIZE_MEDIANCUT = Image.Quantize.MEDIANCUT if hasattr(Image, "Quantize") else Image.MEDIANCUT
+DITHER_NONE = Image.Dither.NONE if hasattr(Image, "Dither") else Image.NONE
 
 WIDTH, HEIGHT = 720, 360
 FRAME_MS = 1400
@@ -183,7 +190,7 @@ def render_frame(index: int) -> Image.Image:
     scene.buzzer(buzzer)
     scene.alexa(alexa)
     scene.caption(caption)
-    return scene.image.quantize(colors=64, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
+    return scene.image.quantize(colors=64, method=QUANTIZE_MEDIANCUT, dither=DITHER_NONE)
 
 
 def main() -> None:
