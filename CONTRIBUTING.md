@@ -21,8 +21,10 @@ what a good change looks like, so reviews are quick and boring.
 ## Development setup
 
 ```bash
-python3 -m pip install platformio clang-format
+python3 -m pip install platformio "clang-format~=23.1" gcovr
 pio test -e native            # unit tests (no hardware)
+pio test -e native-sanitize   # same tests under ASan/UBSan
+scripts/coverage.sh           # coverage gate (gcovr)
 pio run -e esp32dev           # firmware
 scripts/check-format.sh --fix # or: make format
 ```
@@ -35,9 +37,11 @@ Mermaid CLI) for `make docs`, Pillow for `make gif`.
 1. Open an issue first for anything bigger than a bug fix, so the design can
    be discussed before the code.
 2. Branch from `main`.
-3. Add or update tests. A behaviour change in `core`/`application` without a
-   test is a red flag in review.
-4. Run the three checks CI runs: `make test`, `make build`, `make check-format`.
+3. Add or update tests. CI enforces 100 % line coverage of `src/core`,
+   `src/hardware` and `src/application`, so new logic needs a test that
+   exercises every line (`make coverage` shows what is missing).
+4. Run what CI runs: `make test`, `make test-sanitize`, `make coverage`,
+   `make check`, `make build`, `make check-format`.
 5. Update the docs that your change affects (README section, `docs/*.md`,
    diagrams in `docs/diagrams/*.mmd`). If a decision is worth remembering,
    add an ADR under `docs/architecture/adr/`.

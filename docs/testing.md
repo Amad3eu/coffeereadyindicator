@@ -38,6 +38,32 @@ build free of Arduino headers.
 | `test_pattern_player` | Step timing, looping, stop, stalls, overflow |
 | `test_calibration` | Threshold suggestion math and the three-phase calibrator |
 | `test_config` | `CoffeeConfig` validation, `InMemoryConfigStore`, `CompositeNotifier` |
+| `test_enum_strings` | Log names, payload slugs and messages of every enum, including the fallbacks |
+
+### Sanitizers and coverage
+
+Two more native environments reuse the same suites:
+
+```bash
+pio test -e native-sanitize   # AddressSanitizer + UndefinedBehaviorSanitizer (make test-sanitize)
+scripts/coverage.sh --html    # gcov/gcovr line coverage, report in docs/generated/coverage/ (make coverage)
+```
+
+CI runs both. The coverage gate fails below **100 % line coverage** and
+70 % branch coverage of `src/core`, `src/hardware` and `src/application`:
+every line of the platform-independent layers has to be exercised by a
+test. Branch coverage is informative rather than strict because gcov
+counts compiler-generated branches (exception paths, short-circuits).
+
+### Static analysis
+
+```bash
+pio check -e native --fail-on-defect medium --fail-on-defect high   # make check
+```
+
+cppcheck runs over the same three layers (configuration in
+`platformio.ini`, `check_*` keys); CI fails on medium or high defects.
+`.clang-tidy` configures the checks IDEs run on the fly.
 
 ### Mocks
 

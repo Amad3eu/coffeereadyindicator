@@ -234,7 +234,10 @@ You can develop the whole project before buying a single component.
 
 | What | Command | Needs |
 | --- | --- | --- |
-| Unit tests of core, hardware ports and application (71 cases) | `pio test -e native` | a C++17 host compiler |
+| Unit tests of core, hardware ports and application | `pio test -e native` | a C++17 host compiler |
+| Same tests under AddressSanitizer + UBSan | `pio test -e native-sanitize` | GCC or Clang |
+| Line coverage gate (100 % of the platform-independent layers) | `scripts/coverage.sh` | gcovr |
+| Static analysis | `pio check -e native` | nothing else (cppcheck is fetched by PlatformIO) |
 | Full firmware in a browser/VS Code with a virtual sensor | Wokwi (see [Simulation](#simulation)) | free Wokwi license |
 | Compile the real firmware | `pio run -e esp32dev` | nothing else |
 | Serial monitor on real hardware | `pio device monitor -b 115200` | an ESP32 |
@@ -365,6 +368,9 @@ Quick checklist before a PR:
 
 ```bash
 make test          # pio test -e native
+make test-sanitize # pio test -e native-sanitize
+make coverage      # scripts/coverage.sh --html
+make check         # pio check -e native (cppcheck)
 make build         # pio run -e esp32dev
 make check-format  # clang-format
 ```
