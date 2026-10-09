@@ -7,6 +7,12 @@ namespace patterns {
 
 // --- Buzzer -----------------------------------------------------------------
 
+/// One short blip: START accepted, a brew session began.
+constexpr PatternStep kBrewStartedSteps[] = {
+    {true, 80},
+};
+constexpr Pattern kBrewStarted = makePattern(kBrewStartedSteps);
+
 /// BEEP, pause, BEEP: the coffee is ready.
 constexpr PatternStep kCoffeeReadySteps[] = {
     {true, 150},
@@ -23,25 +29,25 @@ constexpr Pattern kSensorFailure = makePattern(kSensorFailureSteps);
 
 // --- Status LED -------------------------------------------------------------
 
-/// Fast blink while the light is being confirmed (DETECTING).
-constexpr PatternStep kDetectingBlinkSteps[] = {
+/// Fast blink while waiting for the machine to leave its green state (STARTING).
+constexpr PatternStep kStartingBlinkSteps[] = {
     {true, 100},
     {false, 150},
 };
-constexpr Pattern kDetectingBlink = makePattern(kDetectingBlinkSteps, true);
+constexpr Pattern kStartingBlink = makePattern(kStartingBlinkSteps, true);
 
-/// Solid on while the coffee is ready (READY, NOTIFIED).
+/// Slow heartbeat while armed and watching for the ready light (BREWING).
+constexpr PatternStep kBrewingBlinkSteps[] = {
+    {true, 60},
+    {false, 940},
+};
+constexpr Pattern kBrewingBlink = makePattern(kBrewingBlinkSteps, true);
+
+/// Solid on while the coffee is ready (READY, COMPLETED).
 constexpr PatternStep kSolidOnSteps[] = {
     {true, 1000},
 };
 constexpr Pattern kSolidOn = makePattern(kSolidOnSteps, true);
-
-/// Slow heartbeat while waiting for the machine to settle (REARMING).
-constexpr PatternStep kRearmingBlinkSteps[] = {
-    {true, 60},
-    {false, 940},
-};
-constexpr Pattern kRearmingBlink = makePattern(kRearmingBlinkSteps, true);
 
 }  // namespace patterns
 }  // namespace coffee

@@ -11,14 +11,14 @@ namespace coffee {
 struct AppConfig {
     CoffeeConfig detection;
 
-    /// How often the sensor is sampled and fed to the detector.
+    /// How often the sensor is sampled and fed to the brew session.
     uint32_t sampleIntervalMs = 50;
 
     /// How often the raw sensor value is logged at DEBUG level.
     uint32_t sensorLogIntervalMs = 5000;
 
-    /// Also send a notification when the machine resets (light off again).
-    bool notifyOnReset = false;
+    /// Settling time of the START button contacts.
+    uint32_t buttonDebounceMs = 50;
 };
 
 }  // namespace coffee
