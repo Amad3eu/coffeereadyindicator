@@ -1,6 +1,6 @@
 ---
-title: "Coffee Sentinel — Architecture"
-subtitle: "An ESP32 watcher that tells the office when the coffee is ready"
+title: "Coffee Ready Indicator — Architecture"
+subtitle: "Coffee Sentinel firmware for the ESP32: tells the office when the coffee is ready"
 author: "Coffee Sentinel contributors"
 date: "2026-10-08 · firmware 0.1.0"
 lang: en
@@ -337,7 +337,7 @@ cppcheck, the firmware builds and a formatting check.
 
 | Version | Scope |
 |---------|--------------------------------------------------------|
-| v0.1 | Brew sessions with the START button, light detection, buzzer, tests, Wokwi, CI (this document) |
+| v0.1 | Brew sessions with the START button, light detection, buzzer, tests, Wokwi, CI (this document); software complete, physical validation pending (`docs/releases/v0.1-checklist.md`) |
 | v0.2 | Wi-Fi link and webhook notifier (already compiled when `secrets.h` exists), webhook retry, NVS save from the console, mDNS |
 | v0.3 | Home Assistant automation for Alexa, MQTT discovery |
 | v0.4 | Battery monitoring, lazy Wi-Fi, light/deep sleep, low-quiescent board profile |

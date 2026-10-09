@@ -1,7 +1,8 @@
-<h1 align="center">☕ Coffee Sentinel</h1>
+<h1 align="center">☕ Coffee Ready Indicator</h1>
 
 <p align="center">
-  <strong>An ESP32-powered coffee machine watcher that lets the office know when the coffee is ready.</strong>
+  <strong>An ESP32-powered coffee machine watcher that lets the office know when the coffee is ready.</strong><br>
+  <sub>Firmware and device name: <em>Coffee Sentinel</em></sub>
 </p>
 
 <p align="center">
@@ -14,12 +15,19 @@
   <img alt="C++17" src="https://img.shields.io/badge/C%2B%2B-17-00599C">
 </p>
 
-A phototransistor watches the green **READY** LED of the office coffee machine.
-You press **START COFFEE** on the device when you start a brew; once the
-machine has left its green state and the LED later comes back green and
-stays green, an ESP32 beeps a buzzer and (optionally) fires a webhook so
-Alexa can say *"O café está pronto."* The machine itself is never opened,
-modified or wired: the device is completely external and reversible.
+**What it is.** A small box next to the office coffee machine: an ESP32, a
+phototransistor taped over the machine's green **READY** LED, a START COFFEE
+button, a buzzer. **Why it exists.** The machine is far from the desks and
+nobody notices when the coffee is done; the machine cannot be modified, so
+the only signal available is its light. **How it works.** You press
+START COFFEE when you start a brew; once the machine has left its green
+state and the LED later comes back green and stays green, the device beeps
+and (optionally) fires a webhook so Alexa can say *"O café está pronto."*
+The machine itself is never opened, modified or wired: the device is
+completely external and reversible.
+
+> **Status: v0.1 software complete and tested; physical validation pending.**
+> See [Real Hardware Validation](#real-hardware-validation).
 
 > **Coffee Sentinel does not treat every green light as coffee ready. A brew
 > cycle must first be started using the device button.** Real machines flash
@@ -271,7 +279,14 @@ session, oscillations after COMPLETED are ignored, a new START allows a new
 cycle, a duplicate START is ignored, button debouncing, invalid sensor
 values and recovery mid-cycle, `millis()` overflow and reboots in every
 state. Mocks exist for the sensor, button, clock, buzzer, LED, notifier,
-network link and logger. Details in [docs/testing.md](docs/testing.md).
+network link and logger. Details in [docs/testing.md](docs/testing.md); the
+manual Wokwi walk-through is in
+[docs/testing/wokwi-manual-test.md](docs/testing/wokwi-manual-test.md).
+
+In CI the automated Wokwi scenario runs **only when the `WOKWI_CLI_TOKEN`
+secret is configured**; otherwise the *Wokwi simulation* job is skipped and
+reported as such, never shown as green
+([docs/testing/wokwi-ci.md](docs/testing/wokwi-ci.md)).
 
 ```bash
 pio test -e native -f test_brew_session        # one suite
@@ -303,6 +318,14 @@ Pins are in [`src/infrastructure/esp32/BoardPins.h`](src/infrastructure/esp32/Bo
 (sensor GPIO34, START button GPIO33, buzzer GPIO25, LED GPIO2). Stored settings are read from NVS
 at boot through `NvsConfigStore`; saving from the serial console is on the
 roadmap.
+
+`readyConfirmationMs` deserves a note: it is the one number that depends on
+how *your* machine behaves. Default `3000` ms; change the default in
+`CoffeeConfig` (or the value in NVS); unit milliseconds; it sets how long the
+green must hold, while armed, before the alert, and therefore the delay
+between the ready light and the beep. After changing it, run the native
+tests, scenario B of the manual Wokwi test, and one real brew. Why it may
+need to change: [docs/hardware/transient-greens.md](docs/hardware/transient-greens.md).
 
 ### Calibration
 
@@ -352,15 +375,51 @@ impact of Wi-Fi and the light/deep-sleep strategies are documented in
 isolate the policies that change (lazy Wi-Fi, sampling interval, boot
 behaviour), so this lands without touching the detection logic.
 
+## Real Hardware Validation
+
+The software is complete and tested (native tests, sanitizers, 100 % line
+coverage of the logic, Wokwi scenarios), but the device has **not** been
+validated on a real coffee machine yet. These values still have to be
+measured on the machine before v0.1 can be called done:
+
+- **Real ADC levels** of the phototransistor at the mounting spot (ambient,
+  machine off, red, green), and whether the 10 kΩ load gives a usable span.
+- **Red versus green separation**: with one phototransistor the thresholds
+  must sit between the red and the green readings; the calibration measures
+  the OFF reference in the non-green state for exactly this reason.
+- **Ambient light**: office lighting, sunlight, flashes and shadows must not
+  push the reading over `lightOnThreshold` (light shield if they do).
+- **Transient greens**: the machine may show green before the coffee is
+  ready. Every such green must be shorter than `readyConfirmationMs`
+  ([docs/hardware/transient-greens.md](docs/hardware/transient-greens.md)).
+- **`readyConfirmationMs`**: 3000 ms is the starting value, not a validated one.
+
+The procedure is [docs/hardware/bring-up.md](docs/hardware/bring-up.md); the
+status of the release is tracked in
+[docs/releases/v0.1-checklist.md](docs/releases/v0.1-checklist.md).
+
+## Limitations
+
+- One phototransistor cannot see colours; "green" is "bright enough", which
+  the calibration makes true by measuring red as the OFF reference. A machine
+  whose red is brighter than its green needs the RGB / two-sensor evolution
+  from the roadmap.
+- A START pressed by mistake leaves the session waiting; cancelling needs a
+  reset until a long-press/timeout lands (roadmap).
+- Session state lives in RAM: a reboot mid-brew loses the session.
+- The webhook is sent once, without retry (roadmap).
+- USB power only in v0.1; battery operation is a later step.
+
 ## Documentation
 
 | Document | Content |
 | --- | --- |
 | [docs/architecture.md](docs/architecture.md) | Overview, layers, hardware flow, state machine, BOM, operation, safety, roadmap. Source of the PDF |
 | [docs/architecture/adr](docs/architecture/adr/README.md) | Why things are the way they are |
-| [docs/hardware](docs/hardware) | [BOM](docs/hardware/BOM.md), [wiring](docs/hardware/wiring.md), [safety](docs/hardware/safety.md), [battery](docs/hardware/battery.md) |
+| [docs/hardware](docs/hardware) | [BOM](docs/hardware/BOM.md), [wiring](docs/hardware/wiring.md), [safety](docs/hardware/safety.md), [bring-up checklist](docs/hardware/bring-up.md), [transient greens](docs/hardware/transient-greens.md), [battery](docs/hardware/battery.md) |
 | [docs/diagrams](docs/diagrams) | Mermaid sources; rendered SVGs in [docs/images/diagrams](docs/images/diagrams) |
-| [docs/testing.md](docs/testing.md) · [docs/calibration.md](docs/calibration.md) · [docs/alexa-integration.md](docs/alexa-integration.md) · [docs/roadmap.md](docs/roadmap.md) | Guides |
+| [docs/testing.md](docs/testing.md) · [docs/testing/wokwi-manual-test.md](docs/testing/wokwi-manual-test.md) · [docs/testing/wokwi-ci.md](docs/testing/wokwi-ci.md) · [docs/calibration.md](docs/calibration.md) · [docs/alexa-integration.md](docs/alexa-integration.md) · [docs/roadmap.md](docs/roadmap.md) | Guides |
+| [docs/releases/v0.1-checklist.md](docs/releases/v0.1-checklist.md) | What is done and what is pending for v0.1 |
 
 Generate the PDF (`docs/generated/coffee-sentinel-architecture.pdf`) and the README GIF:
 
@@ -373,7 +432,7 @@ make gif     # python3 scripts/generate_demo_gif.py — needs Pillow
 
 | Version | Scope |
 | --- | --- |
-| **v0.1** | Light detection, state machine, buzzer, native tests, Wokwi, CI *(this release)* |
+| **v0.1** | Brew sessions with the START button, light detection, buzzer, native tests, Wokwi, CI *(software complete; physical validation pending)* |
 | **v0.2** | Wi-Fi link and webhook notifier *(already compiled in when `secrets.h` exists)*, webhook retry, NVS save from the console, mDNS |
 | **v0.3** | Alexa / Home Assistant integration, MQTT discovery |
 | **v0.4** | Battery monitoring, lazy Wi-Fi, light/deep sleep |
@@ -400,4 +459,4 @@ make check-format  # clang-format
 
 ## License
 
-[MIT](LICENSE) © 2026 Luiz Amadeu (Amad3eu) and the Coffee Sentinel contributors.
+[MIT](LICENSE) © 2026 Luiz Amadeu (Amad3eu).
