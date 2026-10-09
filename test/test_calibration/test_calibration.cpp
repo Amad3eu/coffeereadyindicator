@@ -51,9 +51,9 @@ void tearDown() {}
 void test_sample_stats_track_min_max_mean() {
     SampleStats stats;
     TEST_ASSERT_EQUAL_UINT16(0, stats.mean());
-    stats.add(100);
-    stats.add(300);
     stats.add(200);
+    stats.add(300);  // new maximum
+    stats.add(100);  // new minimum
     TEST_ASSERT_EQUAL_UINT32(3, stats.count());
     TEST_ASSERT_EQUAL_UINT16(100, stats.minimum());
     TEST_ASSERT_EQUAL_UINT16(300, stats.maximum());
@@ -131,6 +131,25 @@ void test_calibrator_retries_phase_without_valid_samples() {
     TEST_ASSERT_FALSE(f.calibrator.isSampling());
 }
 
+void test_live_value_warns_when_the_sensor_is_invalid() {
+    Fixture f;
+    f.sensor.setInvalid();
+    f.runFor(600);
+    TEST_ASSERT_TRUE(f.logger.contains("[WARN][CALIBRATION] live value=invalid"));
+}
+
+void test_finished_calibration_stays_quiet() {
+    Fixture f;
+    f.samplePhase(300);
+    f.samplePhase(320);
+    f.samplePhase(2000);
+    TEST_ASSERT_TRUE(f.calibrator.isDone());
+    TEST_ASSERT_TRUE(f.logger.contains("[CALIBRATION] Calibration complete"));
+    const size_t linesWhenDone = f.logger.lines.size();
+    f.runFor(5000);  // no more live values or prompts
+    TEST_ASSERT_EQUAL_UINT(linesWhenDone, f.logger.lines.size());
+}
+
 void test_confirm_is_ignored_while_sampling_or_done() {
     Fixture f;
     f.sensor.setValue(300);
@@ -157,6 +176,8 @@ int main() {
     RUN_TEST(test_calibrator_walks_through_the_three_phases);
     RUN_TEST(test_calibrator_warns_when_led_on_is_too_close_to_led_off);
     RUN_TEST(test_calibrator_retries_phase_without_valid_samples);
+    RUN_TEST(test_live_value_warns_when_the_sensor_is_invalid);
+    RUN_TEST(test_finished_calibration_stays_quiet);
     RUN_TEST(test_confirm_is_ignored_while_sampling_or_done);
     return UNITY_END();
 }

@@ -172,6 +172,22 @@ void test_sensor_is_sampled_at_the_configured_interval() {
     TEST_ASSERT_EQUAL_UINT32(10, h.sensor.reads);
 }
 
+void test_zero_sample_interval_falls_back_to_default() {
+    AppConfig config;
+    config.sampleIntervalMs = 0;  // would otherwise sample on every loop iteration
+    AppHarness h(config);
+    TEST_ASSERT_EQUAL_UINT32(AppConfig{}.sampleIntervalMs, h.app.config().sampleIntervalMs);
+}
+
+void test_invalid_reading_is_logged_at_debug_level() {
+    AppConfig config;
+    config.sensorLogIntervalMs = 500;
+    AppHarness h(config);
+    h.sensor.setInvalid();
+    h.runFor(1500);
+    TEST_ASSERT_TRUE(h.logger.contains("[SENSOR] value=invalid"));
+}
+
 void test_sensor_value_is_logged_at_debug_level_only() {
     AppConfig config;
     config.sensorLogIntervalMs = 1000;
@@ -199,6 +215,8 @@ int main() {
     RUN_TEST(test_notify_on_reset_when_enabled);
     RUN_TEST(test_network_changes_become_events);
     RUN_TEST(test_sensor_is_sampled_at_the_configured_interval);
+    RUN_TEST(test_zero_sample_interval_falls_back_to_default);
+    RUN_TEST(test_invalid_reading_is_logged_at_debug_level);
     RUN_TEST(test_sensor_value_is_logged_at_debug_level_only);
     return UNITY_END();
 }
