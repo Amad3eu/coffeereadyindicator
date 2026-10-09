@@ -2,14 +2,14 @@
 
 #include <unity.h>
 
-#include "core/CoffeeState.h"
+#include "core/BrewState.h"
 #include "core/Event.h"
 
 namespace coffee {
 namespace test {
 
 /// Compares states by name so a failure prints "IDLE" instead of "0".
-inline void assertState(CoffeeState expected, CoffeeState actual) {
+inline void assertState(BrewState expected, BrewState actual) {
     TEST_ASSERT_EQUAL_STRING(toString(expected), toString(actual));
 }
 

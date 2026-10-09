@@ -10,6 +10,7 @@
 #include "mocks/MockLogger.h"
 #include "mocks/MockNetworkLink.h"
 #include "mocks/MockNotifier.h"
+#include "mocks/MockStartButton.h"
 #include "mocks/MockStatusLed.h"
 
 namespace coffee {
@@ -17,15 +18,14 @@ namespace test {
 
 /// A fully mocked CoffeeSentinelApp plus helpers to run it through time.
 ///
-/// The constructor boots the app and lets it observe a dark sensor for a short
-/// while, so every test starts from a settled IDLE device. Scenarios about
-/// booting with the light already on are covered at the detector level.
+/// The constructor boots the app and lets it run briefly with the light off,
+/// so every test starts from a settled IDLE device.
 struct AppHarness {
     static constexpr uint32_t kLoopStepMs = 10;
     static constexpr uint32_t kSettleMs = 100;
 
     explicit AppHarness(const AppConfig& config = AppConfig{})
-        : app(config, sensor, clock, buzzer, led, notifier, network, logger) {
+        : app(config, sensor, button, clock, buzzer, led, notifier, network, logger) {
         app.begin();
         sensor.setValue(0);
         runFor(kSettleMs);
@@ -45,8 +45,18 @@ struct AppHarness {
         runFor(durationMs);
     }
 
+    /// A clean press of the START button, longer than the debounce window.
+    void pressStart() {
+        const uint32_t hold = app.config().buttonDebounceMs * 3;
+        button.pressed = true;
+        runFor(hold);
+        button.pressed = false;
+        runFor(hold);
+    }
+
     MockClock clock;
     MockLightSensor sensor;
+    MockStartButton button;
     MockBuzzer buzzer;
     MockStatusLed led;
     MockNotifier notifier;
