@@ -42,7 +42,7 @@ jobs:
         run: python3 scripts/build_docs.py
 
       - name: Upload PDF
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coffee-sentinel-architecture
           path: |
@@ -66,7 +66,7 @@ jobs:
         run: python scripts/generate_demo_gif.py
 
       - name: Upload GIF
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coffee-flow-gif
           path: docs/images/coffee-flow.gif
