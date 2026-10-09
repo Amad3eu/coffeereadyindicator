@@ -1,4 +1,4 @@
-# Automated Wokwi scenario (https://docs.wokwi.com/wokwi-ci/scenarios).
+# Automated Wokwi scenario (https://docs.wokwi.com/wokwi-ci/automation-scenarios).
 #
 #   pio run -e esp32dev
 #   wokwi-cli wokwi --scenario scenario.yaml --timeout 60000
