@@ -24,5 +24,5 @@ All notable changes to this project are documented here. The format follows
 - GitHub Actions: native tests, firmware builds, clang-format check, optional Wokwi run, docs/GIF artifacts.
 - Documentation: README, architecture document and PDF pipeline, ADRs, hardware docs (BOM, wiring, safety, battery), calibration, testing, Alexa integration, roadmap, Mermaid diagrams, README GIF generator.
 
-[Unreleased]: https://github.com/Amad3eu/coffeindicator/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/Amad3eu/coffeindicator/releases/tag/v0.1.0
+[Unreleased]: https://github.com/Amad3eu/coffeereadyindicator/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/Amad3eu/coffeereadyindicator/releases/tag/v0.1.0

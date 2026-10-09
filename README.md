@@ -5,9 +5,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Amad3eu/coffeindicator/actions/workflows/ci.yml"><img alt="Build" src="https://github.com/Amad3eu/coffeindicator/actions/workflows/ci.yml/badge.svg?branch=main"></a>
-  <a href="https://github.com/Amad3eu/coffeindicator/actions/workflows/ci.yml"><img alt="Tests" src="https://img.shields.io/github/actions/workflow/status/Amad3eu/coffeindicator/ci.yml?branch=main&label=tests&logo=githubactions&logoColor=white"></a>
-  <a href="https://github.com/Amad3eu/coffeindicator/actions/workflows/docs.yml"><img alt="Docs" src="https://github.com/Amad3eu/coffeindicator/actions/workflows/docs.yml/badge.svg?branch=main"></a>
+  <a href="https://github.com/Amad3eu/coffeereadyindicator/actions/workflows/ci.yml"><img alt="Build" src="https://github.com/Amad3eu/coffeereadyindicator/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  <a href="https://github.com/Amad3eu/coffeereadyindicator/actions/workflows/ci.yml"><img alt="Tests" src="https://img.shields.io/github/actions/workflow/status/Amad3eu/coffeereadyindicator/ci.yml?branch=main&label=tests&logo=githubactions&logoColor=white"></a>
+  <a href="https://github.com/Amad3eu/coffeereadyindicator/actions/workflows/docs.yml"><img alt="Docs" src="https://github.com/Amad3eu/coffeereadyindicator/actions/workflows/docs.yml/badge.svg?branch=main"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
   <a href="https://platformio.org/"><img alt="PlatformIO" src="https://img.shields.io/badge/PlatformIO-esp32dev%20%7C%20native-orange"></a>
   <a href="https://www.espressif.com/en/products/socs/esp32"><img alt="ESP32" src="https://img.shields.io/badge/MCU-ESP32-red"></a>
@@ -204,8 +204,8 @@ Files: [`wokwi/diagram.json`](wokwi/diagram.json), [`wokwi/wokwi.toml`](wokwi/wo
 ## Getting started
 
 ```bash
-git clone https://github.com/Amad3eu/coffeindicator.git
-cd coffeindicator
+git clone https://github.com/Amad3eu/coffeereadyindicator.git
+cd coffeereadyindicator
 
 python3 -m pip install platformio   # or use the PlatformIO IDE extension
 
