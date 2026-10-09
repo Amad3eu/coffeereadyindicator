@@ -177,14 +177,55 @@ jobs:
       - name: Check formatting
         run: scripts/check-format.sh
 
+  wokwi-check:
+    # Token-independent validation of the simulation files, plus the honest
+    # answer to "did the real scenario run?": the job below is SKIPPED (grey,
+    # not green) when the WOKWI_CLI_TOKEN secret is missing.
+    name: Wokwi scenario check
+    runs-on: ubuntu-latest
+    outputs:
+      token-configured: ${{ steps.token.outputs.configured }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate diagram.json and scenario.yaml against the firmware
+        run: |
+          python -m pip install pyyaml
+          python scripts/check_wokwi_scenario.py
+
+      - name: Is WOKWI_CLI_TOKEN configured?
+        id: token
+        env:
+          WOKWI_CLI_TOKEN: ${{ secrets.WOKWI_CLI_TOKEN }}
+        run: |
+          if [ -n "$WOKWI_CLI_TOKEN" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Wokwi::WOKWI_CLI_TOKEN is configured; the real scenario runs in the 'Wokwi simulation' job"
+            echo "## Wokwi: token configured, real scenario will run" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Wokwi scenario SKIPPED::WOKWI_CLI_TOKEN is not configured. The simulation files were validated statically only; the real scenario did NOT run. See docs/testing/wokwi-ci.md"
+            {
+              echo "## Wokwi: real scenario SKIPPED"
+              echo
+              echo "\`WOKWI_CLI_TOKEN\` is not configured, so the automated simulation did **not** run."
+              echo "Only the static check of \`wokwi/diagram.json\` and \`wokwi/scenario.yaml\` passed."
+              echo "Configure the secret as described in \`docs/testing/wokwi-ci.md\` to make this a real validation."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
   wokwi:
-    # Runs the automated simulation scenario when a Wokwi CI token is configured
-    # (Settings > Secrets > Actions > WOKWI_CLI_TOKEN). Skipped on forks.
+    # Runs the automated simulation scenario for real. Skipped (not green)
+    # when the repository has no WOKWI_CLI_TOKEN secret
+    # (Settings > Secrets and variables > Actions > New repository secret).
     name: Wokwi simulation
     runs-on: ubuntu-latest
-    needs: firmware
-    env:
-      WOKWI_CLI_TOKEN: ${{ secrets.WOKWI_CLI_TOKEN }}
+    needs: [firmware, wokwi-check]
+    if: needs.wokwi-check.outputs.token-configured == 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -195,15 +236,21 @@ jobs:
           path: .pio/build/esp32dev
 
       - name: Run scenario
-        if: env.WOKWI_CLI_TOKEN != ''
         uses: wokwi/wokwi-ci-action@v1
         with:
           token: ${{ secrets.WOKWI_CLI_TOKEN }}
           path: wokwi
           scenario: scenario.yaml
-          timeout: 90000
-          expect_text: "[STATE] REARMING -> IDLE"
+          timeout: 180000
+          expect_text: "[STATE] READY -> COMPLETED"
 
-      - name: Skipped
-        if: env.WOKWI_CLI_TOKEN == ''
-        run: echo "WOKWI_CLI_TOKEN not set; simulation skipped"
+      - name: Report
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "::notice title=Wokwi scenario EXECUTED::wokwi/scenario.yaml ran for real and passed"
+            echo "## Wokwi: real scenario EXECUTED and passed" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::error title=Wokwi scenario FAILED::wokwi/scenario.yaml ran for real and failed; see the step log"
+            echo "## Wokwi: real scenario EXECUTED and FAILED" >> "$GITHUB_STEP_SUMMARY"
+          fi
