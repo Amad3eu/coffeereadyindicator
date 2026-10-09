@@ -80,6 +80,12 @@ than its green, the span check fails ("LED ON is too close to LED OFF");
 that machine needs the two-sensor or RGB-sensor evolution listed in the
 roadmap.
 
+## Before trusting the timing
+
+`readyConfirmationMs` (3000 ms by default) is only right if every green the
+machine shows *before* the coffee is ready is shorter than that. Measure it
+on the real machine first: [hardware/transient-greens.md](hardware/transient-greens.md).
+
 ## Why hysteresis and confirmation instead of a single threshold
 
 With a single threshold a reading hovering around it would toggle the
