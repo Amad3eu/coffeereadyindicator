@@ -206,7 +206,7 @@ def prepare_markdown(use_png: bool) -> Path:
     else:
         text = IMAGE_LINK.sub(r"](../images/diagrams/\1.svg)", text)
     # Links to sibling Markdown files become links to the repository.
-    text = RELATIVE_LINK.sub(r"](https://github.com/OWNER/coffee-sentinel/blob/main/docs/\1\2)", text)
+    text = RELATIVE_LINK.sub(r"](https://github.com/Amad3eu/coffeindicator/blob/main/docs/\1\2)", text)
     GENERATED.mkdir(parents=True, exist_ok=True)
     GENERATED_MD.write_text(text, encoding="utf-8")
     return GENERATED_MD
