@@ -18,6 +18,13 @@
       "attrs": { "value": "0" }
     },
     {
+      "type": "wokwi-pushbutton",
+      "id": "btn1",
+      "top": 180,
+      "left": -150,
+      "attrs": { "color": "green", "label": "START COFFEE" }
+    },
+    {
       "type": "wokwi-buzzer",
       "id": "bz1",
       "top": 40,
@@ -43,7 +50,7 @@
       "id": "txt1",
       "top": -60,
       "left": -160,
-      "attrs": { "text": "Turn the potentiometer to simulate the coffee machine LED seen by the phototransistor" }
+      "attrs": { "text": "Potentiometer = light seen by the phototransistor (high = green LED). Press START COFFEE to open a brew session." }
     }
   ],
   "connections": [
@@ -53,6 +60,9 @@
     [ "pot1:VCC", "esp:3V3", "red", [ "v0" ] ],
     [ "pot1:GND", "esp:GND.1", "black", [ "v0" ] ],
     [ "pot1:SIG", "esp:D34", "orange", [ "v0" ] ],
+
+    [ "btn1:1.l", "esp:D33", "blue", [ "v0" ] ],
+    [ "btn1:2.l", "esp:GND.1", "black", [ "v0" ] ],
 
     [ "bz1:2", "esp:D25", "purple", [ "v0" ] ],
     [ "bz1:1", "esp:GND.2", "black", [ "v0" ] ],

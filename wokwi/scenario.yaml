@@ -1,36 +1,97 @@
 # Automated Wokwi scenario (https://docs.wokwi.com/wokwi-ci/automation-scenarios).
 #
 #   pio run -e esp32dev
-#   wokwi-cli wokwi --scenario scenario.yaml --timeout 60000
+#   wokwi-cli wokwi --scenario scenario.yaml --timeout 120000
 #
-# Drives the potentiometer that stands in for the coffee machine LED and
-# checks the serial log for the expected state transitions.
-name: "Coffee ready detection"
+# The potentiometer stands in for the coffee machine LED (high = green) and
+# the push button is "START COFFEE". The three manual scenarios from the
+# project brief are chained: a START pressed while the machine is already
+# green must not alert; a short green must not alert; after COMPLETED the
+# light is ignored until the next START.
+name: "Brew session: start, arm, ready, complete"
 version: 1
 author: "Coffee Sentinel"
 
 steps:
   - wait-serial: "State: IDLE"
 
-  # Light turns on: the potentiometer at 90 % gives ~3700 on the 12-bit ADC.
+  # --- Scenario A: machine already green when START is pressed ----------------
   - set-control:
       part-id: pot1
       control: position
       value: 0.9
-  - wait-serial: "[STATE] IDLE -> DETECTING"
-  - wait-serial: "[STATE] DETECTING -> READY"
-  - wait-serial: "[EVENT] CoffeeReady"
-  - wait-serial: "[NOTIFY] Coffee is ready"
-  - wait-serial: "[STATE] READY -> NOTIFIED"
-
-  # Light stays on: no second alert expected (the next line must be the re-arm).
+  - delay: 1000ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 150ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - wait-serial: "[STATE] IDLE -> STARTING"
+  - wait-serial: "[EVENT] BrewStarted"
+  # Still green for longer than any confirmation window: nothing must happen.
   - delay: 5000ms
-
-  # Light turns off: the machine was switched off or the carafe removed.
+  # The machine leaves its green state: the session arms after 3 s.
   - set-control:
       part-id: pot1
       control: position
       value: 0.02
-  - wait-serial: "[STATE] NOTIFIED -> REARMING"
-  - wait-serial: "[STATE] REARMING -> IDLE"
-  - wait-serial: "[EVENT] CoffeeReset"
+  - wait-serial: "[STATE] STARTING -> BREWING"
+  - wait-serial: "[EVENT] BrewArmed"
+
+  # --- Scenario B: short green does not alert, steady green does ------------
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.9
+  - delay: 1500ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.02
+  - delay: 1500ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.9
+  - wait-serial: "[STATE] BREWING -> READY"
+  - wait-serial: "[EVENT] CoffeeReady"
+  - wait-serial: "[NOTIFY] Coffee is ready"
+  - wait-serial: "[STATE] READY -> COMPLETED"
+  - wait-serial: "[EVENT] BrewCompleted"
+
+  # --- Scenario C: after COMPLETED the light is ignored until START ---------
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.02
+  - delay: 4000ms
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.9
+  - delay: 4000ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - delay: 150ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - wait-serial: "[STATE] COMPLETED -> STARTING"
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.02
+  - wait-serial: "[STATE] STARTING -> BREWING"
+  - set-control:
+      part-id: pot1
+      control: position
+      value: 0.9
+  - wait-serial: "[STATE] BREWING -> READY"
+  - wait-serial: "[STATE] READY -> COMPLETED"
