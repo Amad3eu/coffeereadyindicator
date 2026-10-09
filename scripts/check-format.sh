@@ -4,8 +4,8 @@
 #   scripts/check-format.sh        # exit 1 if any file is not formatted
 #   scripts/check-format.sh --fix  # rewrite files in place
 #
-# Requires clang-format >= 14. `pip install clang-format` provides a binary
-# if your distribution does not.
+# Requires clang-format 23 (the version CI uses): `pip install "clang-format~=23.1"`
+# provides the binary if your distribution does not.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."

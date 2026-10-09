@@ -61,7 +61,8 @@ Small, focused commits are easier to review and to bisect.
 
 ## Code style
 
-* `clang-format` (config in `.clang-format`): Google base, 4 spaces, 110 columns.
+* `clang-format` 23 (config in `.clang-format`): Google base, 4 spaces, 110 columns.
+  `pip install "clang-format~=23.1"` gives the same binary CI uses.
 * Names: `PascalCase` types, `camelCase` functions and variables,
   `trailingUnderscore_` members, `kConstant` for constants, one class per file.
 * Prefer `uint16_t`/`uint32_t` with explicit casts in `printf`-style logs.
