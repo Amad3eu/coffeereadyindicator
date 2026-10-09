@@ -371,4 +371,4 @@ make check-format  # clang-format
 
 ## License
 
-[MIT](LICENSE) © 2026 Coffee Sentinel contributors.
+[MIT](LICENSE) © 2026 Luiz Amadeu (Amad3eu) and the Coffee Sentinel contributors.
