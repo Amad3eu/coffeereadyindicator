@@ -6,7 +6,9 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
-## [0.1.0] - 2026-10-09
+Target: **v0.1.0** — the software is complete and tested; the physical
+validation on the real coffee machine is still pending
+([release checklist](docs/releases/v0.1-checklist.md)).
 
 ### Added
 
@@ -22,11 +24,11 @@ All notable changes to this project are documented here. The format follows
 - `Notifier` port with `SerialNotifier`, `WebhookNotifier` (JSON POST) and `CompositeNotifier`.
 - `NetworkLink` port with a non-blocking ESP32 Wi-Fi adapter, compiled in only when `include/secrets.h` exists.
 - `ConfigStore` port with in-memory and NVS (Preferences) implementations.
-- Interactive three-phase calibration mode (`esp32dev-calibration` environment).
+- False-ready protection: a START pressed while the machine is already green cannot alert; the session first waits for the light to be off for `cycleStartConfirmationMs`.
+- Interactive three-phase calibration mode (`esp32dev-calibration` environment); the OFF reference is measured with the machine in its non-green state (off or red).
 - 102 native unit tests (Unity) with mocks for sensor, button, clock, buzzer, LED, notifier, network and logger; sanitizer run, 100 % line-coverage gate and cppcheck in CI.
 - Wokwi simulation (`wokwi/`, potentiometer + START button) with an automated scenario covering START-while-green, short green and post-completion behaviour.
-- GitHub Actions: native tests, firmware builds, clang-format check, optional Wokwi run, docs/GIF artifacts.
-- Documentation: README, architecture document and PDF pipeline, ADRs, hardware docs (BOM, wiring, safety, battery), calibration, testing, Alexa integration, roadmap, Mermaid diagrams, README GIF generator.
+- GitHub Actions: native tests, sanitizers, coverage gate, cppcheck, firmware builds, clang-format check, static Wokwi scenario check, real Wokwi run when `WOKWI_CLI_TOKEN` exists (skipped and reported otherwise), docs/GIF artifacts.
+- Documentation: README, architecture document and PDF pipeline, ADRs, hardware docs (BOM, wiring, safety, battery, bring-up checklist, transient-green validation), calibration, testing (manual Wokwi scenarios, Wokwi CI), release checklist, Alexa integration, roadmap, Mermaid diagrams, README GIF generator.
 
-[Unreleased]: https://github.com/Amad3eu/coffeereadyindicator/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/Amad3eu/coffeereadyindicator/releases/tag/v0.1.0
+[Unreleased]: https://github.com/Amad3eu/coffeereadyindicator/commits/main
