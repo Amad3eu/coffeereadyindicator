@@ -6,10 +6,16 @@ const char* toString(EventType event) {
     switch (event) {
         case EventType::None:
             return "None";
+        case EventType::BrewStarted:
+            return "BrewStarted";
+        case EventType::BrewArmed:
+            return "BrewArmed";
         case EventType::CoffeeReady:
             return "CoffeeReady";
-        case EventType::CoffeeReset:
-            return "CoffeeReset";
+        case EventType::BrewCompleted:
+            return "BrewCompleted";
+        case EventType::StartIgnored:
+            return "StartIgnored";
         case EventType::SensorFailure:
             return "SensorFailure";
         case EventType::SensorRecovered:
@@ -26,10 +32,16 @@ const char* toSlug(EventType event) {
     switch (event) {
         case EventType::None:
             return "none";
+        case EventType::BrewStarted:
+            return "brew_started";
+        case EventType::BrewArmed:
+            return "brew_armed";
         case EventType::CoffeeReady:
             return "coffee_ready";
-        case EventType::CoffeeReset:
-            return "coffee_reset";
+        case EventType::BrewCompleted:
+            return "brew_completed";
+        case EventType::StartIgnored:
+            return "start_ignored";
         case EventType::SensorFailure:
             return "sensor_failure";
         case EventType::SensorRecovered:
@@ -46,10 +58,16 @@ const char* toMessage(EventType event) {
     switch (event) {
         case EventType::None:
             return "";
+        case EventType::BrewStarted:
+            return "Brew cycle started";
+        case EventType::BrewArmed:
+            return "Watching for the ready light";
         case EventType::CoffeeReady:
             return "Coffee is ready";
-        case EventType::CoffeeReset:
-            return "Coffee machine reset, watching for the next brew";
+        case EventType::BrewCompleted:
+            return "Brew cycle completed";
+        case EventType::StartIgnored:
+            return "Start ignored: a brew cycle is already active";
         case EventType::SensorFailure:
             return "Light sensor failure";
         case EventType::SensorRecovered:

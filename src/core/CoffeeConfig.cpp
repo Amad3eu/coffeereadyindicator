@@ -9,7 +9,7 @@ CoffeeConfig::Error CoffeeConfig::validate() const {
     if (lightOnThreshold > sensorMaxValue) {
         return Error::ThresholdAboveSensorMax;
     }
-    if (readyConfirmationMs == 0 || rearmConfirmationMs == 0) {
+    if (cycleStartConfirmationMs == 0 || readyConfirmationMs == 0) {
         return Error::ZeroConfirmation;
     }
     return Error::None;
