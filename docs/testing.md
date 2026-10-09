@@ -90,6 +90,9 @@ TEST_ASSERT_EQUAL_UINT(1, d.count(EventType::CoffeeReady));
 
 ## 2. Wokwi simulation
 
+Step-by-step manual procedure with the expected log: [testing/wokwi-manual-test.md](testing/wokwi-manual-test.md).
+What CI does with and without a token: [testing/wokwi-ci.md](testing/wokwi-ci.md).
+
 Wokwi runs the real ESP32 firmware binary in the browser or in VS Code. The
 project ships `wokwi/diagram.json` (ESP32 DevKit V1 + potentiometer + START
 COFFEE push button + buzzer + LED) and `wokwi/wokwi.toml`.
@@ -124,8 +127,10 @@ wokwi-cli wokwi --scenario scenario.yaml --timeout 90000
 ```
 
 `wokwi/scenario.yaml` presses the button, moves the potentiometer through
-scenarios A, B and C and asserts the expected serial lines. The CI workflow runs it automatically when the
-repository has a `WOKWI_CLI_TOKEN` secret.
+scenarios A, B and C and asserts the expected serial lines. CI runs it for
+real only when the repository has a `WOKWI_CLI_TOKEN` secret; without it the
+*Wokwi simulation* job is skipped (not green) and only the static check
+`scripts/check_wokwi_scenario.py` runs. Details in [testing/wokwi-ci.md](testing/wokwi-ci.md).
 
 ### Simulating the sensor differently
 
@@ -145,6 +150,8 @@ sensor value every 5 s (`[SENSOR] value=342 light=off`). Run the calibration
 mode once the sensor is mounted: see [calibration.md](calibration.md).
 
 ## 4. What only hardware can tell you
+
+The full procedure is [hardware/bring-up.md](hardware/bring-up.md).
 
 * Whether the chosen resistor gives a usable span between LED off and on.
 * How much room light leaks into the sensor at the mounting spot.
