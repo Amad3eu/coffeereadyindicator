@@ -1,6 +1,9 @@
 # Convenience targets. Everything here is also runnable by hand; see README.md.
 #
 #   make test        native unit tests (no hardware)
+#   make test-sanitize  same tests under AddressSanitizer + UBSan
+#   make coverage    line coverage report of the native tests (gcovr)
+#   make check       cppcheck on the platform-independent layers
 #   make build       ESP32 firmware
 #   make upload      flash the firmware over USB
 #   make monitor     serial monitor at 115200 baud
@@ -18,12 +21,21 @@ PORT ?=
 UPLOAD_FLAGS := $(if $(PORT),--upload-port $(PORT),)
 MONITOR_FLAGS := $(if $(PORT),--port $(PORT),)
 
-.PHONY: all test build upload monitor calibrate format check-format docs diagrams gif clean
+.PHONY: all test test-sanitize coverage check build upload monitor calibrate format check-format docs diagrams gif clean
 
 all: test build
 
 test:
 	$(PIO) test -e native
+
+test-sanitize:
+	$(PIO) test -e native-sanitize
+
+coverage:
+	scripts/coverage.sh --html
+
+check:
+	$(PIO) check -e native --fail-on-defect medium --fail-on-defect high
 
 build:
 	$(PIO) run -e esp32dev
