@@ -10,9 +10,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  PLATFORMIO_CACHE_KEY: pio-${{ hashFiles('platformio.ini') }}
-
 jobs:
   native-tests:
     name: Native unit tests
@@ -28,7 +25,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.platformio
-          key: ${{ runner.os }}-${{ env.PLATFORMIO_CACHE_KEY }}-native
+          key: ${{ runner.os }}-pio-${{ hashFiles('platformio.ini') }}-native
 
       - name: Install PlatformIO
         run: python -m pip install --upgrade platformio
@@ -57,7 +54,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.platformio
-          key: ${{ runner.os }}-${{ env.PLATFORMIO_CACHE_KEY }}-esp32
+          key: ${{ runner.os }}-pio-${{ hashFiles('platformio.ini') }}-esp32
 
       - name: Install PlatformIO
         run: python -m pip install --upgrade platformio
