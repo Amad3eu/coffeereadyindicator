@@ -78,6 +78,7 @@ void Calibrator::prompt() {
             logger_.info(kTag, "Phase 3/3 LED ON: wait for the ready LED to turn on, then press ENTER");
             break;
         case CalibrationPhase::Done:
+            logger_.info(kTag, "Calibration complete; reset the board to run it again");
             break;
     }
 }
@@ -102,23 +103,19 @@ void Calibrator::finishPhase() {
                  static_cast<unsigned>(stats_.minimum()), static_cast<unsigned>(stats_.maximum()),
                  static_cast<unsigned long>(stats_.count()));
 
-    switch (phase_) {
-        case CalibrationPhase::Ambient:
-            result_.ambient = mean;
-            phase_ = CalibrationPhase::LedOff;
-            break;
-        case CalibrationPhase::LedOff:
-            result_.ledOff = mean;
-            phase_ = CalibrationPhase::LedOn;
-            break;
-        case CalibrationPhase::LedOn:
-            result_.ledOn = mean;
-            result_.suggestion = suggestThresholds(result_.ledOff, result_.ledOn);
-            phase_ = CalibrationPhase::Done;
-            logSummary();
-            return;
-        case CalibrationPhase::Done:
-            return;
+    // Sampling can only be started in the three measuring phases, so the
+    // final branch is necessarily LED ON.
+    if (phase_ == CalibrationPhase::Ambient) {
+        result_.ambient = mean;
+        phase_ = CalibrationPhase::LedOff;
+    } else if (phase_ == CalibrationPhase::LedOff) {
+        result_.ledOff = mean;
+        phase_ = CalibrationPhase::LedOn;
+    } else {
+        result_.ledOn = mean;
+        result_.suggestion = suggestThresholds(result_.ledOff, result_.ledOn);
+        phase_ = CalibrationPhase::Done;
+        logSummary();
     }
     prompt();
 }
