@@ -40,6 +40,89 @@ jobs:
           name: native-tests
           path: native-tests.xml
 
+  native-sanitize:
+    name: Native tests (ASan + UBSan)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache PlatformIO packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: ${{ runner.os }}-pio-${{ hashFiles('platformio.ini') }}-native
+
+      - name: Install PlatformIO
+        run: python -m pip install --upgrade platformio
+
+      - name: Run native tests with sanitizers
+        run: pio test -e native-sanitize
+
+  coverage:
+    name: Coverage gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache PlatformIO packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: ${{ runner.os }}-pio-${{ hashFiles('platformio.ini') }}-native
+
+      - name: Install PlatformIO and gcovr
+        run: python -m pip install --upgrade platformio gcovr
+
+      - name: Measure coverage (fails below 100 % lines / 70 % branches)
+        run: scripts/coverage.sh --html | tee coverage.txt
+
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo '## Native test coverage (src/core, src/hardware, src/application)'
+            echo '```'
+            cat coverage.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: docs/generated/coverage
+
+  static-analysis:
+    name: Static analysis (cppcheck)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache PlatformIO packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: ${{ runner.os }}-pio-${{ hashFiles('platformio.ini') }}-check
+
+      - name: Install PlatformIO
+        run: python -m pip install --upgrade platformio
+
+      - name: Run cppcheck
+        run: pio check -e native --fail-on-defect medium --fail-on-defect high
+
   firmware:
     name: ESP32 firmware
     runs-on: ubuntu-latest
