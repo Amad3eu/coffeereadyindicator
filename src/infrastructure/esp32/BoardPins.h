@@ -11,6 +11,11 @@ namespace pins {
 /// does not).
 constexpr uint8_t kLightSensor = 34;
 
+/// "START COFFEE" push button to GND, with the internal pull-up enabled.
+/// GPIO33 is not a strapping pin, has a pull-up, and is an RTC GPIO, so it can
+/// wake the chip from deep sleep later (battery roadmap).
+constexpr uint8_t kStartButton = 33;
+
 /// Active buzzer (through an NPN driver if the buzzer draws more than ~12 mA).
 constexpr uint8_t kBuzzer = 25;
 

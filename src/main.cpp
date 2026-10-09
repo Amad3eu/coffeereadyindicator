@@ -18,6 +18,7 @@
 #include "infrastructure/esp32/BoardPins.h"
 #include "infrastructure/esp32/Esp32AnalogLightSensor.h"
 #include "infrastructure/esp32/Esp32Buzzer.h"
+#include "infrastructure/esp32/Esp32StartButton.h"
 #include "infrastructure/esp32/Esp32StatusLed.h"
 #include "infrastructure/esp32/NvsConfigStore.h"
 #include "infrastructure/esp32/SerialLogger.h"
@@ -45,6 +46,7 @@ constexpr LogLevel kLogLevel = LogLevel::Info;  // LogLevel::Debug also prints s
 ArduinoClock arduinoClock;
 SerialLogger logger(Serial, kLogLevel);
 Esp32AnalogLightSensor lightSensor(pins::kLightSensor);
+Esp32StartButton startButton(pins::kStartButton);
 Esp32Buzzer buzzer(pins::kBuzzer);
 Esp32StatusLed statusLed(pins::kStatusLed);
 SerialNotifier serialNotifier(Serial);
@@ -67,6 +69,7 @@ std::optional<CoffeeSentinelApp> app;
 void initHardware() {
     Serial.begin(kSerialBaudRate);
     lightSensor.begin();
+    startButton.begin();
     buzzer.begin();
     statusLed.begin();
 }
@@ -104,7 +107,8 @@ void setup() {
 #else
     logger.info("INFO", "No include/secrets.h found: running offline (serial notifier only)");
 #endif
-    app.emplace(loadConfig(), lightSensor, arduinoClock, buzzer, statusLed, notifier, network, logger);
+    app.emplace(loadConfig(), lightSensor, startButton, arduinoClock, buzzer, statusLed, notifier, network,
+                logger);
     app->begin();
 #endif
 }
