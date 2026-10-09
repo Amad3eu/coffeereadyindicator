@@ -15,9 +15,11 @@ Two independent mechanisms, both in `core`:
 1. **Hysteresis** (`Hysteresis`): the light is "on" once a reading reaches
    `lightOnThreshold` and "off" only once it drops to `lightOffThreshold`.
    Readings in between keep the previous state.
-2. **Temporal confirmation** (`CoffeeDetector`): the light must be
-   continuously on for `readyConfirmationMs` before `CoffeeReady`, and
-   continuously off for `rearmConfirmationMs` before `CoffeeReset`.
+2. **Temporal confirmation** (`BrewSession`): the light must be
+   continuously off for `cycleStartConfirmationMs` before a session is
+   armed, and continuously on for `readyConfirmationMs` before
+   `CoffeeReady` (updated by ADR 0006; originally the second window
+   re-armed the detector).
 
 Invalid sensor readings freeze the state machine; when valid readings
 return, the current confirmation window restarts, because "continuously"

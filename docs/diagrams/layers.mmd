@@ -3,8 +3,8 @@ flowchart LR
     MAIN["src/main.cpp<br/>composition root"]
     INFRA["src/infrastructure/esp32<br/>Arduino adapters"]
     APP["src/application<br/>coordination · calibration"]
-    HW["src/hardware<br/>ports · PatternPlayer · Logger"]
-    CORE["src/core<br/>detector · hysteresis · events · config"]
+    HW["src/hardware<br/>ports · PatternPlayer · Debouncer · Logger"]
+    CORE["src/core<br/>BrewSession · LightMonitor · hysteresis · events · config"]
     TESTS["test/ (native, Unity)<br/>mocks of every port"]
 
     MAIN --> INFRA

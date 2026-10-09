@@ -4,16 +4,18 @@
 
 ## Context
 
-The detector must announce `CoffeeReady`, `CoffeeReset`, `SensorFailure`
-and `SensorRecovered` without knowing about buzzers, HTTP or Alexa.
+The core must announce `BrewStarted`, `BrewArmed`, `CoffeeReady`,
+`BrewCompleted`, `StartIgnored`, `SensorFailure` and `SensorRecovered`
+without knowing about buttons, buzzers, HTTP or Alexa.
 Options were an observer/event-bus with listener registration, callbacks
 (`std::function`), or plain return values.
 
 ## Decision
 
-`CoffeeDetector::update()` returns a single `EventType` (or `None`).
-`CoffeeSentinelApp` consumes it and routes it to the buzzer pattern player,
-the status LED, the `Notifier` and the `Logger`. Connectivity events
+`BrewSession::update()` / `start()` / `complete()` and
+`LightMonitor::update()` each return a single `EventType` (or `None`).
+`CoffeeSentinelApp` consumes them and routes them to the buzzer pattern
+player, the status LED, the `Notifier` and the `Logger`. Connectivity events
 (`WiFiConnected`, `WiFiDisconnected`) are produced by the application itself
 by polling the `NetworkLink` port, so every event goes through the same
 `handleEvent()` switch.

@@ -9,11 +9,13 @@ Everything runs at 3.3 V. Read [safety.md](safety.md) first.
 | Signal | GPIO | Why this pin | Defined in |
 | --- | --- | --- | --- |
 | Light sensor (analog in) | **34** | ADC1_CH6. Input-only pin with no boot-strapping role, and on ADC1 so readings keep working while Wi-Fi is on (ADC2 is unusable with Wi-Fi active) | `src/infrastructure/esp32/BoardPins.h` |
+| START COFFEE button (input) | **33** | Not a strapping pin, has an internal pull-up, and is an RTC GPIO so it can wake the chip from deep sleep later (battery roadmap). GPIO32 or 27 are equivalent alternatives | same |
 | Buzzer | **25** | Plain output, no boot constraints, DAC-capable if a passive buzzer is used later | same |
 | Status LED | **2** | The DevKit's on-board blue LED | same |
 
 Avoid GPIO 0, 2 (as input), 12 and 15 for new signals: they are strapping
-pins and can prevent the board from booting.
+pins and can prevent the board from booting. GPIO 34–39 are input-only and
+have no internal pull-ups, so they suit the sensor but not the button.
 
 ## Sensor: TEPT4400 + 10 kΩ (emitter follower)
 
@@ -54,6 +56,21 @@ Slide a 5 mm piece of black heat-shrink over the phototransistor so it
 only sees straight ahead, place it over the LED and fix it with a strip of
 tape. A small 3D-printed cap with a 3 mm hole does the same more neatly.
 
+## START COFFEE button
+
+```
+GPIO33 ────┬──── push button ──── GND        INPUT_PULLUP: pressed = LOW
+           │
+   (internal ~45 kΩ pull-up)
+```
+
+A momentary button between GPIO33 and GND is all it takes: the firmware
+enables the internal pull-up and debounces in software (50 ms by default,
+`AppConfig::buttonDebounceMs`), reacting once per press on the falling
+edge. Holding the button does not repeat. For a long cable to a panel
+button, add a 10 kΩ external pull-up and a 100 nF capacitor across the
+button.
+
 ## Buzzer
 
 ```
@@ -93,6 +110,7 @@ GPIO2 ──[220 Ω]──▶|── GND     (anode = longer lead towards the re
    │ 3V3 ●─────────┼──── TEPT4400 C
    │ GND ●─────────┼──┬─ 10 kΩ ─┬── TEPT4400 E ── also to GPIO34
    │ D34 ●─────────┼──┼─────────┘
+   │ D33 ●─────────┼──┼── START button ── GND
    │ D25 ●─────────┼──┼── buzzer (+)
    │               │  └── buzzer (−)
    │ D2  ● (on-board LED)
@@ -103,5 +121,6 @@ GPIO2 ──[220 Ω]──▶|── GND     (anode = longer lead towards the re
 ## Wokwi equivalent
 
 `wokwi/diagram.json` replaces the phototransistor with a potentiometer on
-`D34` (its `SIG` pin) and adds a buzzer on `D25` and a green LED on `D2`
-through 220 Ω. See [../testing.md](../testing.md#2-wokwi-simulation).
+`D34` (its `SIG` pin), adds the START COFFEE push button between `D33` and
+GND, a buzzer on `D25` and a green LED on `D2` through 220 Ω. See
+[../testing.md](../testing.md#2-wokwi-simulation).

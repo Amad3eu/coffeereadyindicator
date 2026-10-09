@@ -7,10 +7,10 @@ even simulate the complete firmware before buying a single component.
 
 | Layer | Native tests (`pio test -e native`) | Wokwi simulation | Real ESP32 |
 | --- | :-: | :-: | :-: |
-| `core/` (detector, hysteresis, events, config, calibration math) | ✅ | ✅ | ✅ |
-| `hardware/` (ports, `PatternPlayer`, `Logger`, `CompositeNotifier`) | ✅ | ✅ | ✅ |
+| `core/` (brew session, light monitor, hysteresis, events, config, calibration math) | ✅ | ✅ | ✅ |
+| `hardware/` (ports, `Debouncer`, `PatternPlayer`, `Logger`, `CompositeNotifier`) | ✅ | ✅ | ✅ |
 | `application/` (`CoffeeSentinelApp`, `Calibrator`) | ✅ with mocks | ✅ | ✅ |
-| `infrastructure/esp32/` ADC sensor, GPIO buzzer/LED, serial, NVS | ✗ | ✅ | ✅ |
+| `infrastructure/esp32/` ADC sensor, GPIO button/buzzer/LED, serial, NVS | ✗ | ✅ | ✅ |
 | `infrastructure/esp32/` Wi-Fi link, webhook | ✗ | partial (Wokwi has a virtual Wi-Fi gateway) | ✅ |
 | Real optics: sensor placement, thresholds, room light | ✗ | ✗ | ✅ only |
 
@@ -19,7 +19,7 @@ even simulate the complete firmware before buying a single component.
 ```bash
 python3 -m pip install platformio   # once
 pio test -e native                  # all suites
-pio test -e native -f test_state_machine         # one suite
+pio test -e native -f test_brew_session          # one suite
 pio test -e native -v                            # verbose Unity output
 COFFEE_TEST_VERBOSE=1 pio test -e native -f test_application   # echo captured log lines
 ```
@@ -33,8 +33,10 @@ build free of Arduino headers.
 | Suite | Covers |
 | --- | --- |
 | `test_hysteresis` | On/off thresholds, dead band, flicker immunity |
-| `test_state_machine` | The 15 lifecycle scenarios from the project brief: no light, short flash, sustained light, exactly one `CoffeeReady`, 20 minutes on, light off, re-arm, second coffee, oscillation near thresholds, invalid readings, `millis()` overflow, reboot in each state |
-| `test_application` | Buzzer beeps, notification after the pattern, LED behaviour, sensor failure chirps, config fallback, failed delivery, Wi-Fi events, sampling interval, log levels |
+| `test_light_monitor` | Readings → light on/off, sensor failure and recovery reported once |
+| `test_brew_session` | The session lifecycle: green before START ignored, START with green on never alerts, confirmed OFF period arms, short green ignored, stable green alerts once, oscillations after COMPLETED ignored, new START → new cycle, duplicate START ignored, sensor failure/recovery during a cycle, `millis()` overflow, reboot in every state |
+| `test_debouncer` | Contact bounce, one press per hold, release/press separation, button held at boot, overflow |
+| `test_application` | Button → session wiring, START blip, duplicate START warning, debounce through the app, buzzer/notifier once per session, LED per state, sensor failure chirps, config fallback, failed delivery, Wi-Fi events, sampling interval, log levels, reboot |
 | `test_pattern_player` | Step timing, looping, stop, stalls, overflow |
 | `test_calibration` | Threshold suggestion math and the three-phase calibrator |
 | `test_config` | `CoffeeConfig` validation, `InMemoryConfigStore`, `CompositeNotifier` |
@@ -68,36 +70,49 @@ cppcheck runs over the same three layers (configuration in
 ### Mocks
 
 `test/mocks/` has one mock per port: `MockClock` (advance time by hand),
-`MockLightSensor`, `MockBuzzer`, `MockStatusLed`, `MockNotifier`,
-`MockNetworkLink`, `MockLogger` (captures lines; `contains()`/`count()`).
-`test/support/` has `DetectorDriver` (feeds a detector over time) and
-`AppHarness` (a fully mocked application).
+`MockLightSensor`, `MockStartButton` (raw level), `MockBuzzer`,
+`MockStatusLed`, `MockNotifier`, `MockNetworkLink`, `MockLogger` (captures
+lines; `contains()`/`count()`). `test/support/` has `SessionDriver` (feeds
+a light monitor + brew session over time) and `AppHarness` (a fully mocked
+application with a `pressStart()` helper).
 
 A typical scenario reads like this:
 
 ```cpp
-DetectorDriver d = bootedInTheDark();
-d.feedValue(kBright, 3500);          // light on for 3.5 s
-assertState(CoffeeState::Ready, d.detector.state());
+SessionDriver d(defaultConfig());
+d.feedValue(kGreen, 1000);           // the machine is idle and green
+d.pressStart();                      // START: session opens, green ignored
+d.feedValue(kDark, 3500);            // machine brewing: armed
+d.feedValue(kGreen, 3500);           // steady green: coffee
+assertState(BrewState::Ready, d.state());
 TEST_ASSERT_EQUAL_UINT(1, d.count(EventType::CoffeeReady));
 ```
 
 ## 2. Wokwi simulation
 
 Wokwi runs the real ESP32 firmware binary in the browser or in VS Code. The
-project ships `wokwi/diagram.json` (ESP32 DevKit V1 + potentiometer +
-buzzer + LED) and `wokwi/wokwi.toml`.
+project ships `wokwi/diagram.json` (ESP32 DevKit V1 + potentiometer + START
+COFFEE push button + buzzer + LED) and `wokwi/wokwi.toml`.
 
 The potentiometer stands in for the phototransistor: turn it up and the
-ADC on GPIO34 rises exactly like it would with the LED on.
+ADC on GPIO34 rises exactly like it would with the green LED on. The push
+button on GPIO33 is the device's START COFFEE button.
+
+Three things to try by hand (the automated `scenario.yaml` chains them):
+
+| Scenario | Steps | Expected |
+| --- | --- | --- |
+| A · START while already green | pot high → press START → wait → pot low → wait 3 s → pot high → wait 3 s | nothing on START; `STARTING -> BREWING` after the low period; exactly one `CoffeeReady` after the high period |
+| B · short green | press START → pot low 3 s → pot high 1.5 s → pot low → pot high 3 s | no alert for the short green; one alert for the long one |
+| C · after COMPLETED | turn the pot up and down as often as you like → press START → pot low 3 s → pot high 3 s | no new `CoffeeReady` until START; the new session alerts once |
 
 ### VS Code
 
 1. Install the [Wokwi for VS Code](https://marketplace.visualstudio.com/items?itemName=Wokwi.wokwi-vscode) extension and request a free license (`Wokwi: Request a new License`).
 2. Build the firmware: `pio run -e esp32dev`.
 3. Run `Wokwi: Select Config File` and pick `wokwi/wokwi.toml`, then `Wokwi: Start Simulator`.
-4. Open the serial monitor inside the simulator window. Drag the potentiometer: the log shows `IDLE -> DETECTING -> READY -> NOTIFIED`, the buzzer sounds and the LED lights.
-5. Turn it back down: `NOTIFIED -> REARMING -> IDLE`.
+4. Open the serial monitor inside the simulator window. Press START COFFEE: `IDLE -> STARTING` and a short blip. Keep the potentiometer low for 3 s: `STARTING -> BREWING`. Turn it up and hold for 3 s: `BREWING -> READY`, the buzzer plays BEEP · BEEP, `[NOTIFY] Coffee is ready`, `READY -> COMPLETED`.
+5. Move the potentiometer as much as you like: nothing happens until the next START.
 
 ### CLI (headless, also used in CI)
 
@@ -108,8 +123,8 @@ pio run -e esp32dev
 wokwi-cli wokwi --scenario scenario.yaml --timeout 90000
 ```
 
-`wokwi/scenario.yaml` turns the potentiometer up and down and asserts the
-expected serial lines. The CI workflow runs it automatically when the
+`wokwi/scenario.yaml` presses the button, moves the potentiometer through
+scenarios A, B and C and asserts the expected serial lines. The CI workflow runs it automatically when the
 repository has a `WOKWI_CLI_TOKEN` secret.
 
 ### Simulating the sensor differently
@@ -134,8 +149,9 @@ mode once the sensor is mounted: see [calibration.md](calibration.md).
 * Whether the chosen resistor gives a usable span between LED off and on.
 * How much room light leaks into the sensor at the mounting spot.
 * Whether your buzzer needs a transistor driver.
+* Whether your machine's red "brewing" light reads below the thresholds (phase 2 of the calibration).
 * Wi-Fi signal quality near the coffee machine.
 
-Everything else (timing, hysteresis, state transitions, alert-once
-semantics, reboot behaviour, overflow safety) is already proven by the
-native tests.
+Everything else (timing, hysteresis, session transitions, the arming rule,
+alert-once semantics, debouncing, reboot behaviour, overflow safety) is
+already proven by the native tests.

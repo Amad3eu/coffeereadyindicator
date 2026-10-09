@@ -23,8 +23,8 @@ The payload sent when the coffee is ready:
 {"event":"coffee_ready","message":"Coffee is ready","device":"coffee-sentinel","version":"0.1.0"}
 ```
 
-With `AppConfig::notifyOnReset = true` a second event `coffee_reset` is sent
-when the light goes off again.
+It is sent once per brew session, after the local buzzer alert, and only
+for a session that was opened with the START COFFEE button.
 
 ## 2. Home Assistant + Alexa Media Player (recommended)
 

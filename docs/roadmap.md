@@ -6,9 +6,10 @@ desktop (`pio test -e native`) and compilable without hardware.
 ## v0.1 — Local detection ✅ (this repository)
 
 - [x] Light detection with hysteresis and temporal confirmation
-- [x] State machine `IDLE → DETECTING → READY → NOTIFIED → REARMING`
+- [x] Brew sessions opened by the START COFFEE button: `IDLE → STARTING → BREWING → READY → COMPLETED`, one alert per session, a green light outside a session is ignored
+- [x] Robust arming: after START the light must leave the green state before a green can count
 - [x] Non-blocking buzzer and status LED patterns
-- [x] Domain events (`CoffeeReady`, `CoffeeReset`, `SensorFailure`, …)
+- [x] Domain events (`BrewStarted`, `BrewArmed`, `CoffeeReady`, `BrewCompleted`, `StartIgnored`, `SensorFailure`, …)
 - [x] Serial notifier and leveled logging
 - [x] Interactive calibration mode
 - [x] Native unit tests with mocks for sensor, clock, buzzer, notifier
@@ -18,7 +19,8 @@ desktop (`pio test -e native`) and compilable without hardware.
 
 - [x] `Esp32WiFiLink` with non-blocking reconnection (compiled when `secrets.h` exists)
 - [x] `WebhookNotifier` posting JSON to any HTTP(S) endpoint
-- [ ] Retry a failed webhook while the light is still on
+- [ ] Retry a failed webhook while the session is still open
+- [ ] Session timeout and cancel (long press) for a START pressed by mistake
 - [ ] Save calibration results to NVS from the serial console (`NvsConfigStore` is already in place)
 - [ ] mDNS name (`coffee-sentinel.local`) and a `/health` endpoint
 
@@ -50,4 +52,5 @@ desktop (`pio test -e native`) and compilable without hardware.
 - Statistics: average brewing time, coffees per day, busiest hour
 - 3D-printed case with an integrated light shield
 - Automatic calibration (learn the LED-on level from the first brew)
+- Two phototransistors with colour filters, or an RGB sensor (TCS34725), to tell red from green directly instead of relying on the OFF-then-ON arming rule
 - Passive buzzer melodies (`Pattern` already supports arbitrary step sequences; a tone output adapter is all that is missing)
