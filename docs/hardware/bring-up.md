@@ -151,7 +151,7 @@ End-to-end runs with the device mounted:
 ## 11. Power
 
 - [ ] USB 5 V supply, ≥ 500 mA; no brown-out resets during Wi-Fi bursts.
-- [ ] Battery operation is **not** part of this bring-up ([battery.md](battery.md), roadmap v0.4).
+- [ ] Battery operation is **not** part of this bring-up ([battery.md](battery.md); it comes after the web platform in the roadmap).
 
 ## 12. Sign-off
 

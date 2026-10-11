@@ -1,4 +1,4 @@
-# Battery operation (planned, v0.4)
+# Battery operation (planned, after the web platform)
 
 v0.1 runs from USB. This page documents the planned evolution to a
 rechargeable cell and the numbers behind the design decisions, so the

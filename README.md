@@ -360,7 +360,9 @@ The ESP32 POSTs
 {"event":"coffee_ready","message":"Coffee is ready","device":"coffee-sentinel","version":"0.1.0"}
 ```
 
-to the webhook URL from `secrets.h`. A Home Assistant automation with a
+to the webhook URL from `secrets.h`. The same events will feed the internal
+Coffee Ready Server planned for v0.2 ([roadmap](docs/roadmap.md)); the
+device only ever publishes events. A Home Assistant automation with a
 `webhook` trigger and the Alexa Media Player integration turns it into an
 announcement; the YAML is in
 [docs/alexa-integration.md](docs/alexa-integration.md), together with
@@ -371,7 +373,8 @@ alternatives (Virtual Smart Home, IFTTT, your own endpoint).
 v0.1 runs from USB. The planned evolution (LiPo + charger/protection module
 or a board with built-in charging), measured consumption figures, the
 impact of Wi-Fi and the light/deep-sleep strategies are documented in
-[docs/hardware/battery.md](docs/hardware/battery.md). The ports already
+[docs/hardware/battery.md](docs/hardware/battery.md); it comes after the
+web platform in the [roadmap](docs/roadmap.md). The ports already
 isolate the policies that change (lazy Wi-Fi, sampling interval, boot
 behaviour), so this lands without touching the detection logic.
 
@@ -432,12 +435,12 @@ make gif     # python3 scripts/generate_demo_gif.py — needs Pillow
 
 | Version | Scope |
 | --- | --- |
-| **v0.1** | Brew sessions with the START button, light detection, buzzer, native tests, Wokwi, CI *(software complete; physical validation pending)* |
-| **v0.2** | Wi-Fi link and webhook notifier *(already compiled in when `secrets.h` exists)*, webhook retry, NVS save from the console, mDNS |
-| **v0.3** | Alexa / Home Assistant integration, MQTT discovery |
-| **v0.4** | Battery monitoring, lazy Wi-Fi, light/deep sleep |
-| **v0.5** | OTA updates, remote configuration |
-| later | OLED display, battery percentage, MQTT, several machines, web dashboard, statistics (brewing time, coffees per day), 3D-printed case, automatic calibration, RGB / two-sensor colour detection, session timeout and cancel |
+| **v0.1** | Firmware + real hardware validation: brew sessions with the START button, light detection, buzzer, native tests, Wokwi, CI *(software complete; physical validation pending)* |
+| **v0.2** | Coffee Ready Server: API, persistence, ingestion of the device events (`device_online`, `brew_started`, `brew_armed`, `coffee_ready`, `brew_completed`, `sensor_failure`, `sensor_recovered`) |
+| **v0.3** | Internal web dashboard (`http://coffee.local`): live status, current brew, daily history |
+| **v0.4** | Real-time updates (SSE) and browser notifications |
+| **v0.5** | Chrome / Firefox WebExtension |
+| later | Analytics, several machines, PWA, Alexa / Home Assistant through the server; on the device: battery and sleep, OTA, OLED, RGB / two-sensor colour detection, session timeout and cancel |
 
 Full list: [docs/roadmap.md](docs/roadmap.md).
 

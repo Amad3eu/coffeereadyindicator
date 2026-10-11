@@ -319,7 +319,7 @@ regardless.
 * Credentials and the webhook URL live in `include/secrets.h`, which is
   git-ignored; `include/secrets.example.h` is the template.
 * The device only makes outbound HTTP requests; it exposes no server.
-* HTTPS is supported without certificate validation in v0.2 (acceptable on a
+* HTTPS is supported without certificate validation in v0.1 (acceptable on a
   LAN; pinning is on the roadmap).
 * Home Assistant webhooks should use a long random id and `local_only: true`.
 
@@ -337,12 +337,12 @@ cppcheck, the firmware builds and a formatting check.
 
 | Version | Scope |
 |---------|--------------------------------------------------------|
-| v0.1 | Brew sessions with the START button, light detection, buzzer, tests, Wokwi, CI (this document); software complete, physical validation pending (`docs/releases/v0.1-checklist.md`) |
-| v0.2 | Wi-Fi link and webhook notifier (already compiled when `secrets.h` exists), webhook retry, NVS save from the console, mDNS |
-| v0.3 | Home Assistant automation for Alexa, MQTT discovery |
-| v0.4 | Battery monitoring, lazy Wi-Fi, light/deep sleep, low-quiescent board profile |
-| v0.5 | OTA updates, remote configuration, release workflow |
-| later | OLED display, battery percentage, several machines, web dashboard, brewing statistics, 3D-printed case, automatic calibration, RGB / two-sensor colour detection, session timeout and cancel |
+| v0.1 | Firmware + real hardware validation: brew sessions with the START button, light detection, buzzer, tests, Wokwi, CI (this document); software complete, physical validation pending (`docs/releases/v0.1-checklist.md`) |
+| v0.2 | Coffee Ready Server on the internal network: API, persistence, ingestion of the device events; the ESP32 only publishes events |
+| v0.3 | Internal web dashboard: live status, current brew, daily history |
+| v0.4 | Real-time updates (Server-Sent Events) and browser notifications |
+| v0.5 | Chrome / Firefox WebExtension |
+| later | Analytics, several machines, PWA, Alexa / Home Assistant through the server; device: battery and sleep, OTA, OLED, RGB / two-sensor colour detection, session timeout and cancel |
 
 Details: `docs/roadmap.md`.
 

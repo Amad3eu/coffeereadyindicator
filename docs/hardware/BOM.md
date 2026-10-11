@@ -26,8 +26,8 @@ numbers for single units.
 | 1 | External LED + 220 Ω resistor | Visible status LED | The DevKit's on-board LED (GPIO2) is used by default |
 | 1 | Heat-shrink tube or small 3D-printed cap | Light shield around the phototransistor | Blocks room light so only the machine's LED reaches the sensor. Makes calibration much easier |
 | 1 | Double-sided tape / hook-and-loop | Mounting on the machine | Reversible; nothing is drilled or glued permanently |
-| 1 | LiPo/Li-ion cell, 3.7 V, 1000–2500 mAh | Battery operation ([battery.md](battery.md)) | Roadmap v0.4 |
-| 1 | Charger/protection module (TP4056 + DW01) or a board with built-in charging (e.g. a FireBeetle, TinyPICO, Lolin32) | Charging and cell protection | Roadmap v0.4 |
+| 1 | LiPo/Li-ion cell, 3.7 V, 1000–2500 mAh | Battery operation ([battery.md](battery.md)) | Roadmap, after the web platform |
+| 1 | Charger/protection module (TP4056 + DW01) or a board with built-in charging (e.g. a FireBeetle, TinyPICO, Lolin32) | Charging and cell protection | Roadmap, after the web platform |
 | 1 | Slide switch | Power on/off | With battery operation |
 | 1 | 3D-printed enclosure | Tidy mount + light shield | Roadmap |
 

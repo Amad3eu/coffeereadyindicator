@@ -84,6 +84,6 @@ curl -X POST http://homeassistant.local:8123/api/webhook/coffee-sentinel \
   `webhook_id` long and random, enable `local_only: true`, and never commit
   `include/secrets.h`.
 * HTTPS endpoints work (`WiFiClientSecure` without certificate validation in
-  v0.2). Certificate pinning is on the roadmap; on a LAN this is an
+  v0.1). Certificate pinning is on the roadmap; on a LAN this is an
   acceptable trade-off.
 * The ESP32 only ever makes outbound requests; it does not open a server.

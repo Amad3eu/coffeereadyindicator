@@ -1,0 +1,28 @@
+%% Future internal platform (roadmap v0.2+). Nothing here exists yet; v0.1 is the device only.
+flowchart TB
+    MACHINE["Coffee machine"] -. "light only" .-> ESP["ESP32 Coffee Ready Indicator<br/>firmware: Coffee Sentinel<br/><i>v0.1 — publishes events, nothing else</i>"]
+    ESP -- "HTTP / webhook<br/>device_online · brew_started · brew_armed<br/>coffee_ready · brew_completed<br/>sensor_failure · sensor_recovered" --> INGEST
+
+    subgraph SERVER["Coffee Ready Server · internal network · Docker behind a reverse proxy"]
+        direction TB
+        INGEST["Event ingestion + API<br/><i>v0.2</i>"]
+        DB[("Database<br/>BrewSession history<br/><i>SQLite first</i>")]
+        RT["Real-time events<br/><i>SSE · v0.4</i>"]
+        INGEST --> DB
+        INGEST --> RT
+    end
+
+    RT --> DASH["Internal web dashboard<br/>http://coffee.local<br/>status · current brew · daily history<br/><i>v0.3</i>"]
+    RT --> NOTIF["Browser notifications<br/>“☕ Coffee is ready!”<br/><i>v0.4</i>"]
+    NOTIF --> CHROME["Chrome"]
+    NOTIF --> FIREFOX["Firefox"]
+    RT --> EXT["WebExtension<br/>status · last coffee · open dashboard<br/><i>v0.5</i>"]
+
+    classDef device fill:#e8f4ea,stroke:#2e7d32,color:#1b1b1b;
+    classDef server fill:#e9eef8,stroke:#3b5bdb,color:#1b1b1b;
+    classDef client fill:#fdf1e3,stroke:#d9822b,color:#1b1b1b;
+    classDef ext fill:#f3f3f3,stroke:#8d8d8d,color:#1b1b1b;
+    class ESP device;
+    class INGEST,DB,RT server;
+    class DASH,NOTIF,CHROME,FIREFOX,EXT client;
+    class MACHINE ext;

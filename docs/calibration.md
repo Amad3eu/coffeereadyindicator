@@ -48,7 +48,7 @@ default `monitor_eol` is fine). In Wokwi, type into the serial terminal.
 
 ## Applying the result
 
-Until the serial `save` command lands (roadmap v0.2), edit the defaults in
+Until the serial `save` command lands (see the roadmap), edit the defaults in
 [`src/core/CoffeeConfig.h`](../src/core/CoffeeConfig.h) or set them in
 `loadConfig()` in `src/main.cpp`, rebuild and flash. The `NvsConfigStore`
 adapter already persists a `CoffeeConfig` to flash; wiring a serial command
