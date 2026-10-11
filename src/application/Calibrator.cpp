@@ -70,9 +70,9 @@ void Calibrator::prompt() {
                          "Phase 1/3 AMBIENT: keep the sensor away from the machine LED, then press ENTER");
             break;
         case CalibrationPhase::LedOff:
-            logger_.info(
-                kTag,
-                "Phase 2/3 LED OFF: mount the sensor on the machine with the LED off, then press ENTER");
+            logger_.info(kTag,
+                         "Phase 2/3 LED OFF: mount the sensor on the machine while it is NOT green (off or "
+                         "red), then press ENTER");
             break;
         case CalibrationPhase::LedOn:
             logger_.info(kTag, "Phase 3/3 LED ON: wait for the ready LED to turn on, then press ENTER");

@@ -1,30 +1,31 @@
-%% Coffee detection state machine (src/core/CoffeeDetector.cpp).
+%% Brew session state machine (src/core/BrewSession.cpp).
 stateDiagram-v2
     direction TB
     [*] --> IDLE
 
-    IDLE --> DETECTING: light on
-    IDLE --> NOTIFIED: light already on at boot<br/>(alertIfLightOnAtBoot = false)
-
-    DETECTING --> IDLE: light off
-    DETECTING --> READY: light on for readyConfirmationMs<br/>⇒ CoffeeReady
-
-    READY --> NOTIFIED: alert delivered<br/>(markNotified)
-
-    NOTIFIED --> REARMING: light off
-
-    REARMING --> NOTIFIED: light on again
-    REARMING --> IDLE: light off for rearmConfirmationMs<br/>⇒ CoffeeReset
-
-    note right of READY
-        Buzzer pattern plays (non-blocking),
-        then the notifier is called once.
-    end note
+    IDLE --> STARTING: START pressed<br/>⇒ BrewStarted
+    STARTING --> BREWING: light OFF for cycleStartConfirmationMs<br/>⇒ BrewArmed
+    BREWING --> READY: light ON for readyConfirmationMs<br/>⇒ CoffeeReady
+    READY --> COMPLETED: alert delivered (buzzer, then notifier)<br/>⇒ BrewCompleted
+    COMPLETED --> STARTING: START pressed<br/>⇒ BrewStarted
 
     note left of IDLE
-        "light on/off" comes from the hysteresis:
-        on at ≥ lightOnThreshold,
-        off at ≤ lightOffThreshold.
-        Invalid readings freeze the machine
-        and raise SensorFailure once.
+        The light is ignored in IDLE and COMPLETED:
+        a green LED only means coffee inside a session.
+    end note
+
+    note right of STARTING
+        A START pressed while the machine is still green
+        never alerts: the session first waits for the
+        machine to leave that state. A green flash
+        during the wait restarts the OFF window.
+    end note
+
+    note right of BREWING
+        "ON" comes from the hysteresis (≥ lightOnThreshold,
+        off again ≤ lightOffThreshold); a green shorter than
+        readyConfirmationMs restarts the ON window.
+        START in STARTING / BREWING / READY ⇒ StartIgnored.
+        Invalid readings freeze the session; on recovery
+        the window in progress restarts.
     end note

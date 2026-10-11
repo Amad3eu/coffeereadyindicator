@@ -1,6 +1,10 @@
 # ADR 0004 — A light already on at boot does not trigger an alert
 
-**Status:** accepted · **Date:** 2026-10-08
+> Superseded on 2026-10-09: with brew sessions (ADR 0006) the light is ignored
+> until START is pressed, so the boot policy and its `alertIfLightOnAtBoot`
+> flag no longer exist. Kept for the record.
+
+**Status:** superseded by [ADR 0006](0006-brew-session.md) · **Date:** 2026-10-08
 
 ## Context
 

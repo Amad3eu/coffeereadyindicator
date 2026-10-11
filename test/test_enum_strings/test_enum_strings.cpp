@@ -3,14 +3,14 @@
 #include <unity.h>
 
 #include "application/Calibrator.h"
+#include "core/BrewState.h"
 #include "core/CoffeeConfig.h"
-#include "core/CoffeeState.h"
 #include "core/Event.h"
 #include "hardware/Logger.h"
 
+using coffee::BrewState;
 using coffee::CalibrationPhase;
 using coffee::CoffeeConfig;
-using coffee::CoffeeState;
 using coffee::EventType;
 using coffee::LogLevel;
 
@@ -21,19 +21,22 @@ constexpr uint8_t kOutOfRange = 0xFF;
 void setUp() {}
 void tearDown() {}
 
-void test_coffee_state_names() {
-    TEST_ASSERT_EQUAL_STRING("IDLE", toString(CoffeeState::Idle));
-    TEST_ASSERT_EQUAL_STRING("DETECTING", toString(CoffeeState::Detecting));
-    TEST_ASSERT_EQUAL_STRING("READY", toString(CoffeeState::Ready));
-    TEST_ASSERT_EQUAL_STRING("NOTIFIED", toString(CoffeeState::Notified));
-    TEST_ASSERT_EQUAL_STRING("REARMING", toString(CoffeeState::Rearming));
-    TEST_ASSERT_EQUAL_STRING("UNKNOWN", toString(static_cast<CoffeeState>(kOutOfRange)));
+void test_brew_state_names() {
+    TEST_ASSERT_EQUAL_STRING("IDLE", toString(BrewState::Idle));
+    TEST_ASSERT_EQUAL_STRING("STARTING", toString(BrewState::Starting));
+    TEST_ASSERT_EQUAL_STRING("BREWING", toString(BrewState::Brewing));
+    TEST_ASSERT_EQUAL_STRING("READY", toString(BrewState::Ready));
+    TEST_ASSERT_EQUAL_STRING("COMPLETED", toString(BrewState::Completed));
+    TEST_ASSERT_EQUAL_STRING("UNKNOWN", toString(static_cast<BrewState>(kOutOfRange)));
 }
 
 void test_event_log_names() {
     TEST_ASSERT_EQUAL_STRING("None", toString(EventType::None));
+    TEST_ASSERT_EQUAL_STRING("BrewStarted", toString(EventType::BrewStarted));
+    TEST_ASSERT_EQUAL_STRING("BrewArmed", toString(EventType::BrewArmed));
     TEST_ASSERT_EQUAL_STRING("CoffeeReady", toString(EventType::CoffeeReady));
-    TEST_ASSERT_EQUAL_STRING("CoffeeReset", toString(EventType::CoffeeReset));
+    TEST_ASSERT_EQUAL_STRING("BrewCompleted", toString(EventType::BrewCompleted));
+    TEST_ASSERT_EQUAL_STRING("StartIgnored", toString(EventType::StartIgnored));
     TEST_ASSERT_EQUAL_STRING("SensorFailure", toString(EventType::SensorFailure));
     TEST_ASSERT_EQUAL_STRING("SensorRecovered", toString(EventType::SensorRecovered));
     TEST_ASSERT_EQUAL_STRING("WiFiConnected", toString(EventType::WiFiConnected));
@@ -43,8 +46,11 @@ void test_event_log_names() {
 
 void test_event_payload_slugs() {
     TEST_ASSERT_EQUAL_STRING("none", toSlug(EventType::None));
+    TEST_ASSERT_EQUAL_STRING("brew_started", toSlug(EventType::BrewStarted));
+    TEST_ASSERT_EQUAL_STRING("brew_armed", toSlug(EventType::BrewArmed));
     TEST_ASSERT_EQUAL_STRING("coffee_ready", toSlug(EventType::CoffeeReady));
-    TEST_ASSERT_EQUAL_STRING("coffee_reset", toSlug(EventType::CoffeeReset));
+    TEST_ASSERT_EQUAL_STRING("brew_completed", toSlug(EventType::BrewCompleted));
+    TEST_ASSERT_EQUAL_STRING("start_ignored", toSlug(EventType::StartIgnored));
     TEST_ASSERT_EQUAL_STRING("sensor_failure", toSlug(EventType::SensorFailure));
     TEST_ASSERT_EQUAL_STRING("sensor_recovered", toSlug(EventType::SensorRecovered));
     TEST_ASSERT_EQUAL_STRING("wifi_connected", toSlug(EventType::WiFiConnected));
@@ -54,9 +60,12 @@ void test_event_payload_slugs() {
 
 void test_event_messages() {
     TEST_ASSERT_EQUAL_STRING("", toMessage(EventType::None));
+    TEST_ASSERT_EQUAL_STRING("Brew cycle started", toMessage(EventType::BrewStarted));
+    TEST_ASSERT_EQUAL_STRING("Watching for the ready light", toMessage(EventType::BrewArmed));
     TEST_ASSERT_EQUAL_STRING("Coffee is ready", toMessage(EventType::CoffeeReady));
-    TEST_ASSERT_EQUAL_STRING("Coffee machine reset, watching for the next brew",
-                             toMessage(EventType::CoffeeReset));
+    TEST_ASSERT_EQUAL_STRING("Brew cycle completed", toMessage(EventType::BrewCompleted));
+    TEST_ASSERT_EQUAL_STRING("Start ignored: a brew cycle is already active",
+                             toMessage(EventType::StartIgnored));
     TEST_ASSERT_EQUAL_STRING("Light sensor failure", toMessage(EventType::SensorFailure));
     TEST_ASSERT_EQUAL_STRING("Light sensor recovered", toMessage(EventType::SensorRecovered));
     TEST_ASSERT_EQUAL_STRING("Wi-Fi connected", toMessage(EventType::WiFiConnected));
@@ -93,7 +102,7 @@ void test_calibration_phase_names() {
 
 int main() {
     UNITY_BEGIN();
-    RUN_TEST(test_coffee_state_names);
+    RUN_TEST(test_brew_state_names);
     RUN_TEST(test_event_log_names);
     RUN_TEST(test_event_payload_slugs);
     RUN_TEST(test_event_messages);

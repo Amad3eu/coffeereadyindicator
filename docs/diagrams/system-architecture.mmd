@@ -1,17 +1,22 @@
-%% System architecture: from the coffee machine LED to Alexa.
+%% System architecture: from the START button and the coffee machine LED to Alexa.
 %% Rendered by scripts/build_docs.py into docs/images/diagrams/system-architecture.svg
 flowchart TB
     subgraph machine["Coffee machine (never opened, never wired)"]
-        LED["Green READY LED"]
+        LED["READY LED<br/>green when done, red/off while brewing"]
     end
 
     LED -. "light only" .-> PT["Phototransistor TEPT4400<br/>+ 10 kΩ load"]
+    USER(["Person starts the machine<br/>and presses START COFFEE"]) --> BTN["Push button<br/>GPIO33, INPUT_PULLUP"]
 
     subgraph device["Coffee Sentinel · ESP32 DevKit V1"]
         direction TB
+        BTN --> BUTTON["Esp32StartButton<br/><i>infrastructure</i>"]
+        BUTTON --> DEBOUNCE["Debouncer<br/><i>hardware</i>"]
         PT --> SENSOR["Esp32AnalogLightSensor<br/><i>infrastructure</i>"]
-        SENSOR --> DETECTOR["CoffeeDetector<br/>hysteresis · confirmation · state machine<br/><i>core</i>"]
-        DETECTOR -- "EventType" --> APP["CoffeeSentinelApp<br/><i>application</i>"]
+        SENSOR --> MONITOR["LightMonitor<br/>hysteresis · sensor health<br/><i>core</i>"]
+        DEBOUNCE -- "start()" --> SESSION["BrewSession<br/>IDLE · STARTING · BREWING · READY · COMPLETED<br/><i>core</i>"]
+        MONITOR -- "light on/off" --> SESSION
+        SESSION -- "EventType" --> APP["CoffeeSentinelApp<br/><i>application</i>"]
         APP --> BUZZER["Buzzer<br/>PatternPlayer"]
         APP --> SLED["Status LED<br/>PatternPlayer"]
         APP --> NOTIFIER["Notifier"]
@@ -27,7 +32,7 @@ flowchart TB
     classDef app fill:#e9eef8,stroke:#3b5bdb,color:#1b1b1b;
     classDef infra fill:#fdf1e3,stroke:#d9822b,color:#1b1b1b;
     classDef ext fill:#f3f3f3,stroke:#8d8d8d,color:#1b1b1b;
-    class DETECTOR core;
-    class APP,BUZZER,SLED,NOTIFIER app;
-    class SENSOR,SERIAL,WEBHOOK,WIFI infra;
-    class LED,PT,HA,ALEXA ext;
+    class MONITOR,SESSION core;
+    class APP,BUZZER,SLED,NOTIFIER,DEBOUNCE app;
+    class SENSOR,BUTTON,SERIAL,WEBHOOK,WIFI infra;
+    class LED,PT,BTN,USER,HA,ALEXA ext;

@@ -1,6 +1,6 @@
 %% Hardware signal flow and wiring overview (docs/hardware/wiring.md).
 flowchart LR
-    MACHINE["Coffee machine<br/>green READY LED"] -. "optical coupling only" .-> PT
+    MACHINE["Coffee machine<br/>READY LED"] -. "optical coupling only" .-> PT
 
     subgraph sensor["Sensor circuit (emitter follower)"]
         direction TB
@@ -9,14 +9,20 @@ flowchart LR
         NODE --> R1["10 kΩ"] --> GND1["GND"]
     end
 
+    subgraph button["START COFFEE"]
+        direction TB
+        BTN["Push button"] --> GND2["GND"]
+    end
+
     NODE --> ESP["ESP32 DevKit V1"]
+    BTN -- "GPIO33 (INPUT_PULLUP)" --> ESP
 
     ESP -- "GPIO25" --> DRV["NPN driver<br/>(optional)"] --> BUZZER["Active buzzer"]
     ESP -- "GPIO2" --> LED["Status LED<br/>(on-board)"]
     ESP -- "2.4 GHz Wi-Fi" --> ROUTER["Router → Home Assistant"]
 
     USB["USB 5 V"] --> ESP
-    BATTERY["LiPo + charger<br/>(roadmap v0.4)"] -.-> ESP
+    BATTERY["LiPo + charger<br/>(roadmap)"] -.-> ESP
 
     classDef ext fill:#f3f3f3,stroke:#8d8d8d,color:#1b1b1b;
     classDef warn fill:#fdecec,stroke:#c62828,color:#1b1b1b;

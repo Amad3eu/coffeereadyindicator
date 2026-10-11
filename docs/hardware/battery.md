@@ -1,4 +1,4 @@
-# Battery operation (planned, v0.4)
+# Battery operation (planned, after the web platform)
 
 v0.1 runs from USB. This page documents the planned evolution to a
 rechargeable cell and the numbers behind the design decisions, so the
@@ -62,10 +62,11 @@ With a 2000 mAh cell:
 4. **Deep sleep with wake-up on light.** The ESP32 can wake from deep sleep
    when an RTC GPIO crosses a threshold (`ext0`/`ext1`, digital) or through
    the ULP coprocessor reading the ADC. Since GPIO34 is an RTC pin, the
-   phototransistor can wake the chip directly. The state machine then runs
-   with a fresh `CoffeeDetector`; the "light already on at boot" policy
-   needs to be revisited for this mode (it would suppress the alert), which
-   is exactly why `alertIfLightOnAtBoot` exists as a configuration flag.
+   phototransistor can wake the chip directly, and GPIO33 (the START
+   button, also an RTC GPIO) can wake it on a press. A brew session lives
+   in RAM, so a deep-sleep design must keep the `BrewSession` state in RTC
+   memory across wake-ups (or treat each wake-up as a new START); the core
+   class is a plain value and can be copied there as is.
 5. **Battery monitoring.** A 100 kΩ/100 kΩ divider from the cell to an ADC1
    pin (or the board's built-in divider) gives the voltage; the
    `LightSensor`-style port pattern applies (`BatteryMonitor` interface,
@@ -74,9 +75,9 @@ With a 2000 mAh cell:
 
 ## Why not in v0.1
 
-* Deep sleep changes the boot behaviour, which interacts with the detection
+* Deep sleep changes the boot behaviour, which interacts with the session
   logic. The logic must be solid and well tested first (it is: see
-  `test/test_state_machine`).
+  `test/test_brew_session`).
 * The sensor must be characterised on real hardware before choosing a
   wake-up threshold.
 * USB power is perfectly fine next to a coffee machine that is already

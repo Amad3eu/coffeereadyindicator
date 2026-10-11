@@ -4,6 +4,7 @@
 #   make test-sanitize  same tests under AddressSanitizer + UBSan
 #   make coverage    line coverage report of the native tests (gcovr)
 #   make check       cppcheck on the platform-independent layers
+#   make check-wokwi static validation of the Wokwi files (no token needed)
 #   make build       ESP32 firmware
 #   make upload      flash the firmware over USB
 #   make monitor     serial monitor at 115200 baud
@@ -21,7 +22,7 @@ PORT ?=
 UPLOAD_FLAGS := $(if $(PORT),--upload-port $(PORT),)
 MONITOR_FLAGS := $(if $(PORT),--port $(PORT),)
 
-.PHONY: all test test-sanitize coverage check build upload monitor calibrate format check-format docs diagrams gif clean
+.PHONY: all test test-sanitize coverage check check-wokwi build upload monitor calibrate format check-format docs diagrams gif clean
 
 all: test build
 
@@ -36,6 +37,9 @@ coverage:
 
 check:
 	$(PIO) check -e native --fail-on-defect medium --fail-on-defect high
+
+check-wokwi:
+	$(PYTHON) scripts/check_wokwi_scenario.py
 
 build:
 	$(PIO) run -e esp32dev

@@ -41,7 +41,7 @@ Mermaid CLI) for `make docs`, Pillow for `make gif`.
    `src/hardware` and `src/application`, so new logic needs a test that
    exercises every line (`make coverage` shows what is missing).
 4. Run what CI runs: `make test`, `make test-sanitize`, `make coverage`,
-   `make check`, `make build`, `make check-format`.
+   `make check`, `make check-wokwi`, `make build`, `make check-format`.
 5. Update the docs that your change affects (README section, `docs/*.md`,
    diagrams in `docs/diagrams/*.mmd`). If a decision is worth remembering,
    add an ADR under `docs/architecture/adr/`.
@@ -77,7 +77,7 @@ Small, focused commits are easier to review and to bisect.
 ## Tests
 
 * Unity, one suite per `test/test_*/` folder, each with its own `main()`.
-* Use the helpers: `DetectorDriver` for core scenarios, `AppHarness` for
+* Use the helpers: `SessionDriver` for core scenarios, `AppHarness` for
   application scenarios, `assertState`/`assertEvent` for readable failures.
 * Time is always driven through `MockClock`; never sleep in a test.
 * Name tests after the behaviour: `test_light_returning_during_rearm_does_not_alert_again`.

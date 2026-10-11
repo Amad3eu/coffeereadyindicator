@@ -23,8 +23,8 @@ The payload sent when the coffee is ready:
 {"event":"coffee_ready","message":"Coffee is ready","device":"coffee-sentinel","version":"0.1.0"}
 ```
 
-With `AppConfig::notifyOnReset = true` a second event `coffee_reset` is sent
-when the light goes off again.
+It is sent once per brew session, after the local buzzer alert, and only
+for a session that was opened with the START COFFEE button.
 
 ## 2. Home Assistant + Alexa Media Player (recommended)
 
@@ -84,6 +84,6 @@ curl -X POST http://homeassistant.local:8123/api/webhook/coffee-sentinel \
   `webhook_id` long and random, enable `local_only: true`, and never commit
   `include/secrets.h`.
 * HTTPS endpoints work (`WiFiClientSecure` without certificate validation in
-  v0.2). Certificate pinning is on the roadmap; on a LAN this is an
+  v0.1). Certificate pinning is on the roadmap; on a LAN this is an
   acceptable trade-off.
 * The ESP32 only ever makes outbound requests; it does not open a server.

@@ -32,8 +32,8 @@ struct CalibrationResult {
 /// Interactive three-phase calibration:
 ///
 ///   1. ambient  - sensor away from the machine
-///   2. LED off  - sensor mounted, ready LED off
-///   3. LED on   - sensor mounted, ready LED on
+///   2. LED off  - sensor mounted, machine not green (off, or red while brewing)
+///   3. LED on   - sensor mounted, ready LED green
 ///
 /// Each phase waits for `confirm()` (a key press on the serial monitor), then
 /// samples for `sampleWindowMs` and logs the mean. The final phase also logs

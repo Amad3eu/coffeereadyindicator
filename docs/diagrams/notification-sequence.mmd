@@ -1,29 +1,40 @@
-%% What happens on one coffee, from sampling to the webhook.
+%% One brew session, from the START press to the webhook.
 sequenceDiagram
     autonumber
-    participant S as LightSensor
-    participant D as CoffeeDetector
+    participant U as Person
+    participant B as StartButton + Debouncer
+    participant S as LightSensor + LightMonitor
+    participant W as BrewSession
     participant A as CoffeeSentinelApp
-    participant B as Buzzer (PatternPlayer)
+    participant Z as Buzzer (PatternPlayer)
     participant N as Notifier
 
+    U->>B: press START COFFEE
+    B-->>A: debounced press
+    A->>W: start(nowMs)
+    W-->>A: BrewStarted
+    A->>Z: play(kBrewStarted)
+    Note over W: IDLE → STARTING<br/>(a green light right now is ignored)
+
     loop every sampleIntervalMs (50 ms)
-        A->>S: read()
-        S-->>A: LightReading
-        A->>D: update(reading, nowMs)
-        D-->>A: EventType::None
+        A->>S: read() → update()
+        S-->>A: light on/off, healthy
+        A->>W: update(lightOn, healthy, nowMs)
     end
 
-    Note over D: light on for readyConfirmationMs<br/>DETECTING → READY
-    A->>D: update(reading, nowMs)
-    D-->>A: EventType::CoffeeReady
-    A->>B: play(kCoffeeReady, nowMs)
+    Note over W: light OFF for cycleStartConfirmationMs<br/>STARTING → BREWING
+    W-->>A: BrewArmed
+
+    Note over W: light ON for readyConfirmationMs<br/>BREWING → READY
+    W-->>A: CoffeeReady
+    A->>Z: play(kCoffeeReady)
 
     loop until the pattern ends (~420 ms)
-        A->>B: update(nowMs)
+        A->>Z: update(nowMs)
     end
 
     A->>N: notify(CoffeeReady)
     N-->>A: true / false (logged as WARN)
-    A->>D: markNotified(nowMs)
-    Note over D: READY → NOTIFIED
+    A->>W: complete(nowMs)
+    W-->>A: BrewCompleted
+    Note over W: READY → COMPLETED<br/>(light ignored until the next START)

@@ -45,7 +45,7 @@ void test_zero_confirmation_is_rejected() {
     TEST_ASSERT_EQUAL(static_cast<int>(CoffeeConfig::Error::ZeroConfirmation),
                       static_cast<int>(config.validate()));
     config.readyConfirmationMs = 1;
-    config.rearmConfirmationMs = 0;
+    config.cycleStartConfirmationMs = 0;
     TEST_ASSERT_FALSE(config.isValid());
 }
 
@@ -56,11 +56,11 @@ void test_in_memory_store_round_trips() {
 
     CoffeeConfig saved;
     saved.lightOnThreshold = 2222;
-    saved.rearmConfirmationMs = 7000;
+    saved.cycleStartConfirmationMs = 7000;
     TEST_ASSERT_TRUE(store.save(saved));
     TEST_ASSERT_TRUE(store.load(loaded));
     TEST_ASSERT_EQUAL_UINT16(2222, loaded.lightOnThreshold);
-    TEST_ASSERT_EQUAL_UINT32(7000, loaded.rearmConfirmationMs);
+    TEST_ASSERT_EQUAL_UINT32(7000, loaded.cycleStartConfirmationMs);
 }
 
 void test_composite_notifier_fans_out() {
