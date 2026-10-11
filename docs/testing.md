@@ -123,7 +123,7 @@ Three things to try by hand (the automated `scenario.yaml` chains them):
 curl -L https://wokwi.com/ci/install.sh | sh     # installs wokwi-cli
 export WOKWI_CLI_TOKEN=...                        # https://wokwi.com/dashboard/ci
 pio run -e esp32dev
-wokwi-cli wokwi --scenario scenario.yaml --timeout 90000
+wokwi-cli wokwi --scenario scenario.yaml --timeout 45000
 ```
 
 `wokwi/scenario.yaml` presses the button, moves the potentiometer through
