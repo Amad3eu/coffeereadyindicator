@@ -1,13 +1,19 @@
 # Automated Wokwi scenario (https://docs.wokwi.com/wokwi-ci/automation-scenarios).
 #
 #   pio run -e esp32dev
-#   wokwi-cli wokwi --scenario scenario.yaml --timeout 120000
+#   wokwi-cli wokwi --scenario scenario.yaml --timeout 45000
 #
 # The potentiometer stands in for the coffee machine LED (high = green) and
 # the push button is "START COFFEE". The three manual scenarios from the
 # project brief are chained: a START pressed while the machine is already
 # green must not alert; a short green must not alert; after COMPLETED the
 # light is ignored until the next START.
+#
+# Ordering rule (wokwi-cli): `wait-serial` only sees serial bytes emitted
+# AFTER the step starts. Every expected line must therefore be waited for
+# right after the action that triggers it, never after a `delay`, and the
+# button is released only after its lines were matched. Total simulated time
+# is about 28 s; the CI timeout is 45 s of simulated time.
 name: "Brew session: start, arm, ready, complete"
 version: 1
 author: "Coffee Sentinel"
@@ -20,21 +26,21 @@ steps:
       part-id: pot1
       control: position
       value: 0.9
-  - delay: 1000ms
+  - delay: 500ms
   - set-control:
       part-id: btn1
       control: pressed
       value: 1
-  - delay: 150ms
+  - wait-serial: "[BUTTON] START pressed"
+  - wait-serial: "[STATE] IDLE -> STARTING"
+  - wait-serial: "[EVENT] BrewStarted"
   - set-control:
       part-id: btn1
       control: pressed
       value: 0
-  - wait-serial: "[STATE] IDLE -> STARTING"
-  - wait-serial: "[EVENT] BrewStarted"
-  # Still green for longer than any confirmation window: nothing must happen.
-  - delay: 5000ms
-  # The machine leaves its green state: the session arms after 3 s.
+  # Still green for longer than readyConfirmationMs: nothing may happen.
+  - delay: 4000ms
+  # The machine leaves its green state: the session arms after cycleStartConfirmationMs.
   - set-control:
       part-id: pot1
       control: position
@@ -68,22 +74,21 @@ steps:
       part-id: pot1
       control: position
       value: 0.02
-  - delay: 4000ms
+  - delay: 3500ms
   - set-control:
       part-id: pot1
       control: position
       value: 0.9
-  - delay: 4000ms
+  - delay: 3500ms
   - set-control:
       part-id: btn1
       control: pressed
       value: 1
-  - delay: 150ms
+  - wait-serial: "[STATE] COMPLETED -> STARTING"
   - set-control:
       part-id: btn1
       control: pressed
       value: 0
-  - wait-serial: "[STATE] COMPLETED -> STARTING"
   - set-control:
       part-id: pot1
       control: position

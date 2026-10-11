@@ -9,7 +9,11 @@ Checks that:
   * every ``wait-serial`` string can actually be produced by the firmware:
     state transitions use real BrewState names, events use real EventType
     names, notifications use real messages, and any other text appears
-    literally in src/.
+    literally in src/ (printf format strings included);
+  * no ``wait-serial`` directly follows a ``delay`` (wokwi-cli only matches
+    bytes emitted after the wait starts, so such a delay can swallow the
+    expected line and hang the scenario until the CI time limit);
+  * the explicit delays stay within a small simulated-time budget.
 
 Run it locally with ``python3 scripts/check_wokwi_scenario.py`` (needs PyYAML).
 It is what the "Wokwi scenario check" CI job runs; the real simulation only
@@ -34,6 +38,12 @@ DIAGRAM = ROOT / "wokwi" / "diagram.json"
 SCENARIO = ROOT / "wokwi" / "scenario.yaml"
 TOML = ROOT / "wokwi" / "wokwi.toml"
 SRC = ROOT / "src"
+
+# Keep the scenario well inside the free Wokwi CI wall-clock limit (5 min):
+# the ESP32 simulates at roughly half real time, and the CI run passes
+# --timeout in *simulated* milliseconds.
+CI_TIMEOUT_MS = 45_000
+MAX_DELAY_MS = 20_000
 
 KNOWN_CONTROLS = {
     "wokwi-potentiometer": {"position"},
@@ -93,7 +103,15 @@ def main() -> int:
     patterns = format_patterns(sources)
 
     waits = 0
+    delay_ms = 0
+    previous_kind = None
     for index, step in enumerate(steps, start=1):
+        kind = next(iter(step.keys()), None)
+        if kind == "wait-serial" and previous_kind == "delay":
+            # wokwi-cli only matches bytes emitted after the wait-serial step
+            # starts; a delay in front of it can swallow the expected line.
+            fail(f"step {index}: wait-serial right after a delay is a race; wait first, the wait already consumes the time")
+        previous_kind = kind
         if "set-control" in step:
             control = step["set-control"]
             part = control.get("part-id")
@@ -129,12 +147,18 @@ def main() -> int:
             if not produced_by_firmware(message, sources, patterns):
                 fail(f"step {index}: '{text}' cannot be produced by any firmware log line")
         elif "delay" in step:
-            if not re.match(r"^\d+ms$", str(step["delay"])):
+            match = re.match(r"^(\d+)ms$", str(step["delay"]))
+            if not match:
                 fail(f"step {index}: delay must look like '1500ms', got '{step['delay']}'")
+            else:
+                delay_ms += int(match.group(1))
         else:
             fail(f"step {index}: unknown step type {list(step.keys())}")
 
     print(f"checked {waits} wait-serial expectations against {len(states)} states and {len(events)} events")
+    print(f"explicit delays: {delay_ms / 1000:.1f} s of simulated time (budget {MAX_DELAY_MS / 1000:.0f} s)")
+    if delay_ms > MAX_DELAY_MS:
+        fail(f"explicit delays add up to {delay_ms} ms; keep the scenario short, the CI timeout is {CI_TIMEOUT_MS} ms")
     if errors:
         for error in errors:
             print(f"error: {error}", file=sys.stderr)

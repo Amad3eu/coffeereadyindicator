@@ -236,13 +236,17 @@ jobs:
           path: .pio/build/esp32dev
 
       - name: Run scenario
+        # timeout is in SIMULATED milliseconds (~2x that in wall-clock time);
+        # the scenario needs ~28 s, the free Wokwi CI plan stops at 5 min of
+        # wall-clock time. The scenario's own completion is the pass criterion;
+        # any firmware warning fails the run immediately.
         uses: wokwi/wokwi-ci-action@v1
         with:
           token: ${{ secrets.WOKWI_CLI_TOKEN }}
           path: wokwi
           scenario: scenario.yaml
-          timeout: 180000
-          expect_text: "[STATE] READY -> COMPLETED"
+          timeout: 45000
+          fail_text: "[WARN]"
 
       - name: Report
         if: always()
