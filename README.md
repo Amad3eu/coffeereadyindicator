@@ -226,7 +226,7 @@ pio run -e esp32dev                       # build the firmware
 # VS Code: install the Wokwi extension, "Wokwi: Select Config File" -> wokwi/wokwi.toml, "Wokwi: Start Simulator"
 # CLI:
 wokwi-cli wokwi                           # interactive
-wokwi-cli wokwi --scenario scenario.yaml  # automated: presses START, drives the pot, expects the transitions
+wokwi-cli wokwi --scenario scenario.yaml --timeout 45000  # automated: presses START, drives the pot, expects the transitions
 ```
 
 Files: [`wokwi/diagram.json`](wokwi/diagram.json), [`wokwi/wokwi.toml`](wokwi/wokwi.toml), [`wokwi/scenario.yaml`](wokwi/scenario.yaml).

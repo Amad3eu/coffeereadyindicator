@@ -29,6 +29,10 @@ validation on the real coffee machine is still pending
 - 102 native unit tests (Unity) with mocks for sensor, button, clock, buzzer, LED, notifier, network and logger; sanitizer run, 100 % line-coverage gate and cppcheck in CI.
 - Wokwi simulation (`wokwi/`, potentiometer + START button) with an automated scenario covering START-while-green, short green and post-completion behaviour.
 - GitHub Actions: native tests, sanitizers, coverage gate, cppcheck, firmware builds, clang-format check, static Wokwi scenario check, real Wokwi run when `WOKWI_CLI_TOKEN` exists (skipped and reported otherwise), docs/GIF artifacts.
+
+### Fixed
+
+- Wokwi scenario: every expected serial line is now waited for right after its trigger (wokwi-cli only matches bytes emitted after the wait starts), the simulated-time timeout is 45 s and warnings fail the run, so a stuck simulation no longer burns the 5-minute Wokwi CI limit.
 - Documentation: README, architecture document and PDF pipeline, ADRs, hardware docs (BOM, wiring, safety, battery, bring-up checklist, transient-green validation), calibration, testing (manual Wokwi scenarios, Wokwi CI), release checklist, Alexa integration, roadmap, Mermaid diagrams, README GIF generator.
 
 [Unreleased]: https://github.com/Amad3eu/coffeereadyindicator/commits/main

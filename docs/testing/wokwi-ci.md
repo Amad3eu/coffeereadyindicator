@@ -38,13 +38,34 @@ and the job has run green at least once, treat the automated simulation as
 Pull requests from forks never receive secrets, so the simulation stays
 skipped there by design.
 
+## Time limits and how the scenario is written
+
+* The free Wokwi CI plan stops a simulation after **5 minutes of wall-clock
+  time** ("API Error: Connection timed out after 5 minutes"). A scenario
+  that waits for a line that never comes burns the whole budget.
+* `--timeout` (the action's `timeout` input) is in **simulated**
+  milliseconds. The ESP32 simulates at roughly half real time with this
+  firmware, so the CI value of `45000` is about 90 s of wall-clock time:
+  a stuck scenario fails in well under two minutes instead of five.
+* The scenario itself needs about 28 s of simulated time (the static check
+  prints the explicit delays and keeps them under 20 s).
+* `wait-serial` only matches bytes emitted **after the step starts**
+  (wokwi-cli registers a pause point at that moment). Every expected line
+  is therefore waited for immediately after the action that triggers it,
+  and the START button is released only after its lines were matched.
+  Putting a `delay` between the action and the wait can swallow the line
+  and hang the scenario; `scripts/check_wokwi_scenario.py` rejects a
+  `wait-serial` that directly follows a `delay`.
+* `fail_text: "[WARN]"` makes any warning (duplicate START, sensor failure)
+  fail the run immediately.
+
 ## Running it yourself
 
 ```bash
 curl -L https://wokwi.com/ci/install.sh | sh        # installs wokwi-cli
 export WOKWI_CLI_TOKEN=...                           # same token
 pio run -e esp32dev
-wokwi-cli wokwi --scenario scenario.yaml --timeout 180000
+wokwi-cli wokwi --scenario scenario.yaml --timeout 45000 --fail-text "[WARN]"
 python3 scripts/check_wokwi_scenario.py              # the static check CI runs
 ```
 
